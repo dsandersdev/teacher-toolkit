@@ -30,3 +30,7 @@ temp/
 dist/
 build/
 *.egg-info/
+
+*~
+*.un~
+dir_list.txt
