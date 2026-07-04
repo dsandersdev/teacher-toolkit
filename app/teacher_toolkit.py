@@ -59,6 +59,28 @@ class TeacherToolkit:
 
         return self.ai.chat(prompt)
 
+    def generate_parent_email(
+       self,
+       situation: str,
+       tone: str = "friendly and professional", 
+    ) -> str:
+        prompt = f"""
+          You are an experienced teacher.
+
+            Write a parent communication email.
+
+            Situation:
+            {situation}
+
+            Requirements:
+            - Tone: {tone}
+            - Warm greeting
+            - Clear explanation
+            - Supportive language
+            - Professional closing 
+        """
+        return self.ai.chat(prompt)
+
     def save_output(self, content: str, prefix: str) -> Path:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{prefix}_{timestamp}.md"
@@ -74,6 +96,7 @@ def main():
     print("\n=== Teacher Toolkit ===\n")
     print("1. Lesson plan")
     print("2. Worksheet")
+    print("3. Parent email")
 
     choice = input("\nChoose an option: ").strip()
 
@@ -86,17 +109,39 @@ def main():
     if not topic:
         topic = "Addition and subtraction within 100"
 
-    if choice == "2":
+    if choice == "3":
+        situation = input("Describe situation: ").strip()
+
+        print("\nGenerating parent email...\n")
+
+        result = toolkit.generate_parent_email(
+            situation=situation
+        )
+
+        prefix = "parent_email"
+        title = "Generated Parent Email"
+
+    elif choice == "2":
         print("\nGenerating worksheet...\n")
-        result = toolkit.generate_worksheet(topic=topic, grade=grade)
+
+        result = toolkit.generate_worksheet(
+            topic=topic,
+            grade=grade,
+        )
+
         prefix = "worksheet"
         title = "Generated Worksheet"
+
     else:
         print("\nGenerating lesson plan...\n")
-        result = toolkit.generate_lesson(topic=topic, grade=grade)
+
+        result = toolkit.generate_lesson(
+            topic=topic,
+            grade=grade,
+        )
+
         prefix = "lesson_plan"
         title = "Generated Lesson Plan"
-
     print(f"\n=== {title} ===\n")
     print(result)
 
