@@ -39,6 +39,26 @@ class TeacherToolkit:
 
         return self.ai.chat(prompt)
 
+    def generate_worksheet(self, topic: str, grade: str) -> str:
+        prompt = f"""
+        You are an expert elementary teacher.
+
+        Create a printable worksheet.
+
+        Grade: {grade}
+        Topic: {topic}
+
+        Include:
+        - student name line
+        - date line
+        - directions
+        - 10 practice problems
+        - 2 challenge problems
+        - answer key
+        """
+
+        return self.ai.chat(prompt)
+
     def save_output(self, content: str, prefix: str) -> Path:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{prefix}_{timestamp}.md"
@@ -52,9 +72,13 @@ def main():
     toolkit = TeacherToolkit()
 
     print("\n=== Teacher Toolkit ===\n")
+    print("1. Lesson plan")
+    print("2. Worksheet")
+
+    choice = input("\nChoose an option: ").strip()
 
     grade = input("Grade: ").strip()
-    topic = input("Lesson topic: ").strip()
+    topic = input("Topic: ").strip()
 
     if not grade:
         grade = "2nd Grade"
@@ -62,14 +86,21 @@ def main():
     if not topic:
         topic = "Addition and subtraction within 100"
 
-    print("\nGenerating lesson plan...\n")
+    if choice == "2":
+        print("\nGenerating worksheet...\n")
+        result = toolkit.generate_worksheet(topic=topic, grade=grade)
+        prefix = "worksheet"
+        title = "Generated Worksheet"
+    else:
+        print("\nGenerating lesson plan...\n")
+        result = toolkit.generate_lesson(topic=topic, grade=grade)
+        prefix = "lesson_plan"
+        title = "Generated Lesson Plan"
 
-    lesson = toolkit.generate_lesson(topic=topic, grade=grade)
+    print(f"\n=== {title} ===\n")
+    print(result)
 
-    print("\n=== Generated Lesson Plan ===\n")
-    print(lesson)
-
-    saved_path = toolkit.save_output(lesson, "lesson_plan")
+    saved_path = toolkit.save_output(result, prefix)
 
     print(f"\nSaved to: {saved_path}")
 
