@@ -1,29 +1,47 @@
 from sdk.ai import AI, AIConfig
-from app.exporters.markdown import MarkdownExporter
+
+from app.config.settings import Settings
 from app.exporters.docx import DocxExporter
 from app.exporters.manager import ExportManager
-from app.config.settings import Settings
-from app.registry import GENERATOR_REGISTRY
+from app.exporters.markdown import MarkdownExporter
 from app.exporters.metadata import MetadataExporter
+from app.registry import GENERATOR_REGISTRY
 from app.storage.library import ResourceLibrary
+from app.users.manager import ProfileManager
+
 
 class TeacherToolkit:
     def __init__(self):
         self.settings = Settings()
         self.library = ResourceLibrary()
+        self.profile_manager = ProfileManager()
+
+        try:
+            self.teacher_profile = self.profile_manager.load("default_teacher")
+            print()
+            print(f"Welcome {self.teacher_profile.name}")
+            print(f"School: {self.teacher_profile.school}")
+        except FileNotFoundError:
+            self.teacher_profile = self.settings
+            print()
+            print("No teacher profile found.")
+            print("Using default settings.")
+
         self.ai = AI(
             AIConfig(
                 provider=self.settings.ai_provider,
                 model=self.settings.ai_model,
             )
         )
+
         self.generators = {
             key: item["class"](
-            self.ai,
-            self.settings,
-        )
-    for key, item in GENERATOR_REGISTRY.items()
-}
+                self.ai,
+                self.teacher_profile,
+            )
+            for key, item in GENERATOR_REGISTRY.items()
+        }
+
         exporters = []
 
         if self.settings.export_markdown:
@@ -35,7 +53,6 @@ class TeacherToolkit:
         exporters.append(MetadataExporter())
 
         self.export_manager = ExportManager(exporters=exporters)
-
 
     def finish(
         self,
@@ -56,7 +73,6 @@ class TeacherToolkit:
         for path in saved_paths:
             print(f"- {path}")
 
-            
     def build_title(self, values: dict) -> str:
         return (
             values.get("topic")
@@ -99,7 +115,6 @@ class TeacherToolkit:
         lesson = lessons[selected_index]
         metadata = lesson.get("metadata", {})
         lesson_content = lesson.get("content", "")
-
         grade = metadata.get("grade", "2nd Grade")
 
         question_count = input("Question Count [10]: ").strip() or "10"
@@ -123,7 +138,7 @@ class TeacherToolkit:
                 "created_from": lesson.get("id"),
                 "created_from_type": lesson.get("type"),
             },
-}
+        }
 
         self.finish(
             result,
@@ -183,14 +198,15 @@ class TeacherToolkit:
             "relationships": {
                 "created_from": lesson.get("id"),
                 "created_from_type": lesson.get("type"),
-        },
-}
+            },
+        }
 
         self.finish(
             result,
             "worksheet",
             metadata=worksheet_metadata,
         )
+
     def view_lesson_resources(self):
         lessons = self.library.find_by_type("lesson_plan")
 
@@ -201,7 +217,11 @@ class TeacherToolkit:
         print("\n=== Saved Lessons ===\n")
 
         for index, lesson in enumerate(lessons, start=1):
-            title = lesson.get("title") or lesson.get("metadata", {}).get("title") or "Untitled"
+            title = (
+                lesson.get("title")
+                or lesson.get("metadata", {}).get("title")
+                or "Untitled"
+            )
             grade = lesson.get("metadata", {}).get("grade", "")
 
             if grade:
@@ -231,11 +251,16 @@ class TeacherToolkit:
             return
 
         for index, resource in enumerate(related, start=1):
-            title = resource.get("title") or resource.get("metadata", {}).get("title") or "Untitled"
+            title = (
+                resource.get("title")
+                or resource.get("metadata", {}).get("title")
+                or "Untitled"
+            )
             resource_type = resource.get("type", "unknown")
             created_at = resource.get("created_at", "")
 
             print(f"{index}. {resource_type} | {title} | {created_at}")
+
 
 def main():
     toolkit = TeacherToolkit()
@@ -275,7 +300,6 @@ def main():
             topic = metadata.get("topic", "")
             student_name = metadata.get("student_name", "")
             situation = metadata.get("situation", "")
-
 
             title = metadata.get("title") or (
                 topic
@@ -341,7 +365,7 @@ def main():
 
     if choice == "9":
         toolkit.view_lesson_resources()
-        return 
+        return
 
     item = GENERATOR_REGISTRY[choice]
     values = {}
@@ -353,14 +377,11 @@ def main():
         label = field.replace("_", " ").title()
 
         if default:
-            value = input(
-                f"{label} [{default}]: "
-            ).strip()
+            value = input(f"{label} [{default}]: ").strip()
             values[field] = value or default
         else:
-            values[field] = input(
-                f"{label}: "
-            ).strip()
+            values[field] = input(f"{label}: ").strip()
+
     generator = toolkit.generators[choice]
 
     result = generator.generate(**values)
@@ -369,12 +390,13 @@ def main():
         "title": toolkit.build_title(values),
         **values,
     }
-    
+
     toolkit.finish(
         result,
         item["prefix"],
         metadata=metadata,
     )
+
 
 if __name__ == "__main__":
     main()
