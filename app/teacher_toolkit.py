@@ -56,6 +56,15 @@ class TeacherToolkit:
         for path in saved_paths:
             print(f"- {path}")
 
+            
+    def build_title(self, values: dict) -> str:
+        return (
+            values.get("topic")
+            or values.get("student_name")
+            or values.get("situation")
+            or "Untitled"
+        )
+
 def main():
     toolkit = TeacherToolkit()
 
@@ -91,7 +100,8 @@ def main():
             student_name = metadata.get("student_name", "")
             situation = metadata.get("situation", "")
 
-            title = (
+
+            title = metadata.get("title") or (
                 topic
                 or student_name
                 or situation
@@ -141,10 +151,15 @@ def main():
 
     result = generator.generate(**values)
 
+    metadata = {
+        "title": toolkit.build_title(values),
+        **values,
+    }
+    
     toolkit.finish(
         result,
         item["prefix"],
-        metadata=values
+        metadata=metadata,
     )
 
 if __name__ == "__main__":
