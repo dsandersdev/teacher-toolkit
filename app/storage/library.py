@@ -11,7 +11,14 @@ class ResourceLibrary:
 
         for path in self.output_dir.glob("*.json"):
             data = json.loads(path.read_text(encoding="utf-8"))
-            data["_path"] = str(path)
+            if "id" not in data:
+                data["id"] = path.stem
+
+            if "title" not in data:
+                metadata = data.get("metadata", {})
+                data["title"] = metadata.get("title", "Untitled")
+                data["_path"] = str(path)
+
             resources.append(data)
 
         return sorted(

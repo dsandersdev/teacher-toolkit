@@ -1,4 +1,5 @@
 import json
+import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -17,11 +18,15 @@ class MetadataExporter:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_path = self.output_dir / f"{prefix}_{timestamp}.json"
 
+        metadata = metadata or {}
+
         data = {
+            "id": metadata.get("id") or str(uuid.uuid4()),
             "type": prefix,
+            "title": metadata.get("title", "Untitled"),
             "created_at": datetime.now().isoformat(),
             "content": content,
-            "metadata": metadata or {},
+            "metadata": metadata,
         }
 
         output_path.write_text(
