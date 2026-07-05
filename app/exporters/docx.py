@@ -2,7 +2,8 @@ from datetime import datetime
 from pathlib import Path
 
 from docx import Document
-from docx.shared import Pt
+from docx.shared import Pt, Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 
 class DocxExporter:
@@ -23,45 +24,74 @@ class DocxExporter:
 
         document = Document()
 
+        # Page setup
+        section = document.sections[0]
+        section.top_margin = Inches(0.7)
+        section.bottom_margin = Inches(0.7)
+        section.left_margin = Inches(0.8)
+        section.right_margin = Inches(0.8)
+
+        # Fonts
         styles = document.styles
         styles["Normal"].font.name = "Calibri"
         styles["Normal"].font.size = Pt(11)
 
-        title = metadata.get("title", prefix.replace("_", " ").title())
+        title = metadata.get(
+            "title",
+            prefix.replace("_", " ").title(),
+        )
 
-        document.add_heading(title, level=0)
+        # Title
+        heading = document.add_heading(title, level=0)
+        heading.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        if metadata.get("grade"):
-            document.add_paragraph(f"Grade: {metadata['grade']}")
+        # Metadata section
+        if metadata:
+            meta_table = document.add_table(rows=0, cols=2)
 
-        if metadata.get("curriculum"):
-            document.add_paragraph(f"Curriculum: {metadata['curriculum']}")
+            for key, value in metadata.items():
+                row = meta_table.add_row()
+                row.cells[0].text = key.replace("_", " ").title()
+                row.cells[1].text = str(value)
 
-        document.add_paragraph("")
+            document.add_paragraph("")
 
+        # Content
         for line in content.splitlines():
             clean_line = line.strip()
 
             if not clean_line:
-                document.add_paragraph("")
                 continue
 
             if clean_line.startswith("# "):
-                document.add_heading(clean_line.replace("# ", ""), level=1)
+                document.add_heading(
+                    clean_line[2:],
+                    level=1,
+                )
 
             elif clean_line.startswith("## "):
-                document.add_heading(clean_line.replace("## ", ""), level=2)
+                document.add_heading(
+                    clean_line[3:],
+                    level=2,
+                )
 
             elif clean_line.startswith("### "):
-                document.add_heading(clean_line.replace("### ", ""), level=3)
+                document.add_heading(
+                    clean_line[4:],
+                    level=3,
+                )
 
             elif clean_line.startswith("- "):
                 document.add_paragraph(
-                    clean_line.replace("- ", ""),
+                    clean_line[2:],
                     style="List Bullet",
                 )
 
-            elif clean_line[0:2].isdigit() and clean_line[2:3] in [".", ")"]:
+            elif (
+                len(clean_line) > 2
+                and clean_line[0].isdigit()
+                and clean_line[1:3] in [". ", ") "]
+            ):
                 document.add_paragraph(
                     clean_line,
                     style="List Number",
@@ -69,7 +99,16 @@ class DocxExporter:
 
             else:
                 paragraph = document.add_paragraph(clean_line)
-                paragraph.paragraph_format.space_after = Pt(6)
+                paragraph.paragraph_format.space_after = Pt(8)
+
+        # Footer
+        footer = document.sections[0].footer
+        footer.paragraphs[0].text = (
+            "Generated with Teacher Toolkit"
+        )
+        footer.paragraphs[0].alignment = (
+            WD_ALIGN_PARAGRAPH.CENTER
+        )
 
         document.save(output_path)
 
