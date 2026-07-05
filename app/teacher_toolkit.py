@@ -5,10 +5,12 @@ from app.exporters.manager import ExportManager
 from app.config.settings import Settings
 from app.registry import GENERATOR_REGISTRY
 from app.exporters.metadata import MetadataExporter
+from app.storage.library import ResourceLibrary
 
 class TeacherToolkit:
     def __init__(self):
         self.settings = Settings()
+        self.library = ResourceLibrary()
         self.ai = AI(
             AIConfig(
                 provider=self.settings.ai_provider,
@@ -62,10 +64,36 @@ def main():
     for key, item in GENERATOR_REGISTRY.items():
         print(f"{key}. {item['name']}")
 
+    print("6. View saved resources")
+
     choice = input("\nChoose: ").strip()
 
-    if choice not in GENERATOR_REGISTRY:
+    if choice != "6" and choice not in GENERATOR_REGISTRY:
         print("Invalid option")
+        return
+
+    if choice == "6":
+        resources = toolkit.library.all()
+
+        print("\n=== Saved Resources ===\n")
+
+        for index, resource in enumerate(resources, start=1):
+            metadata = resource.get("metadata", {})
+
+            title = (
+                metadata.get("topic")
+                or metadata.get("student_name")
+                or metadata.get("situation")
+                or "Untitled"
+            )
+
+            print(
+                f"{index}. "
+                f"{resource.get('type')} | "
+                f"{title} | "
+                f"{resource.get('created_at')}"
+            )
+
         return
 
     item = GENERATOR_REGISTRY[choice]
