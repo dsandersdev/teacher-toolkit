@@ -6,6 +6,7 @@ from app.generators.parent_email import ParentEmailGenerator
 
 from app.exporters.markdown import MarkdownExporter
 from app.exporters.docx import DocxExporter
+from app.exporters.manager import ExportManager
 
 
 class TeacherToolkit:
@@ -21,8 +22,13 @@ class TeacherToolkit:
         self.worksheets = WorksheetGenerator(self.ai)
         self.parent_emails = ParentEmailGenerator(self.ai)
 
-        self.markdown_exporter = MarkdownExporter()
-        self.docx_exporter = DocxExporter()
+        self.export_manager = ExportManager(
+            exporters=[
+                MarkdownExporter(),
+                DocxExporter(),
+            ]
+        )
+
 
     def create_lesson(self):
         grade = input("Grade: ").strip()
@@ -74,18 +80,14 @@ class TeacherToolkit:
         print("\n")
         print(content)
 
-        md_path = self.markdown_exporter.save(
+        saved_paths = self.export_manager.save_all(
             content,
             prefix,
         )
 
-        docx_path = self.docx_exporter.save(
-            content,
-            prefix,
-        )
-
-        print(f"\nSaved Markdown: {md_path}")
-        print(f"Saved DOCX: {docx_path}")
+        print("\nSaved files:")
+        for path in saved_paths:
+            print(f"- {path}")
 
 def main():
     toolkit = TeacherToolkit()
