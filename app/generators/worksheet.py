@@ -6,12 +6,13 @@ class WorksheetGenerator:
         self.ai = ai
         self.templates = TemplateLoader()
 
-    def generate(self, topic: str, grade: str) -> str:
+    def generate(self, topic: str, grade: str, curriculum: str) -> str:
         prompt = self.templates.render(
             "worksheet.txt",
             {
                 "grade": grade,
                 "topic": topic,
+                "curriculum": curriculum,
             },
         )
 

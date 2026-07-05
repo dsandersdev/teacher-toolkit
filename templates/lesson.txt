@@ -4,6 +4,8 @@ Create a complete lesson plan.
 
 Grade: {{ grade }}
 Topic: {{ topic }}
+Curriculum: 
+{{ curriculum }}
 
 Include:
 - Learning objectives

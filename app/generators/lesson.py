@@ -6,12 +6,14 @@ class LessonGenerator:
         self.ai = ai
         self.templates = TemplateLoader()
 
-    def generate(self, topic: str, grade: str) -> str:
+    def generate(self, topic: str, grade: str, curriculum: str) -> str:
         prompt = self.templates.render(
             "lesson.txt",
             {
                 "grade": grade,
                 "topic": topic,
+                "curriculum": curriculum,
+
             },
         )
 
