@@ -1,7 +1,10 @@
-from datetime import datetime
-from pathlib import Path
+from sdk.ai import AI, AIConfig
 
-from sdk.ai import AIConfig, AI
+from app.generators.lesson import LessonGenerator
+from app.generators.worksheet import WorksheetGenerator
+from app.generators.parent_email import ParentEmailGenerator
+
+from app.exporters.markdown import MarkdownExporter
 
 
 class TeacherToolkit:
@@ -13,152 +16,92 @@ class TeacherToolkit:
             )
         )
 
-        self.output_dir = Path("outputs")
-        self.output_dir.mkdir(exist_ok=True)
+        self.lessons = LessonGenerator(self.ai)
+        self.worksheets = WorksheetGenerator(self.ai)
+        self.parent_emails = ParentEmailGenerator(self.ai)
 
-    def generate_lesson(self, topic: str, grade: str) -> str:
-        prompt = f"""
-        You are an expert teacher.
+        self.exporter = MarkdownExporter()
 
-        Create a complete lesson plan.
+    def create_lesson(self):
+        grade = input("Grade: ").strip()
+        topic = input("Topic: ").strip()
 
-        Grade: {grade}
-        Topic: {topic}
+        result = self.lessons.generate(
+            topic=topic,
+            grade=grade,
+        )
 
-        Include:
-        - Learning objectives
-        - Standards
-        - Materials
-        - Warm-up
-        - Direct instruction
-        - Guided practice
-        - Independent practice
-        - Differentiation
-        - Assessment
-        """
+        self.finish(
+            result,
+            "lesson_plan",
+        )
 
-        return self.ai.chat(prompt)
+    def create_worksheet(self):
+        grade = input("Grade: ").strip()
+        topic = input("Topic: ").strip()
 
-    def generate_worksheet(self, topic: str, grade: str) -> str:
-        prompt = f"""
-        You are an expert elementary teacher.
+        result = self.worksheets.generate(
+            topic=topic,
+            grade=grade,
+        )
 
-        Create a printable worksheet.
+        self.finish(
+            result,
+            "worksheet",
+        )
 
-        Grade: {grade}
-        Topic: {topic}
+    def create_parent_email(self):
+        situation = input(
+            "Describe situation: "
+        ).strip()
 
-        Include:
-        - student name line
-        - date line
-        - directions
-        - 10 practice problems
-        - 2 challenge problems
-        - answer key
-        """
+        result = self.parent_emails.generate(
+            situation=situation,
+        )
 
-        return self.ai.chat(prompt)
+        self.finish(
+            result,
+            "parent_email",
+        )
 
-    def generate_parent_email(
+    def finish(
         self,
-        situation: str,
-        tone: str = "friendly and professional",
-    ) -> str:
-        prompt = f"""
-        You are an experienced teacher.
+        content: str,
+        prefix: str,
+    ):
+        print("\n")
+        print(content)
 
-        Write a parent communication email.
+        path = self.exporter.save(
+            content,
+            prefix,
+        )
 
-        Situation:
-        {situation}
-
-        Requirements:
-        - Tone: {tone}
-        - Warm greeting
-        - Clear explanation
-        - Supportive language
-        - Professional closing
-        """
-
-        return self.ai.chat(prompt)
-
-
-    def save_output(self, content: str, prefix: str) -> Path:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{prefix}_{timestamp}.md"
-        output_path = self.output_dir / filename
-
-        output_path.write_text(content, encoding="utf-8")
-        return output_path
+        print(f"\nSaved: {path}")
 
 
 def main():
     toolkit = TeacherToolkit()
 
-    print("\n=== Teacher Toolkit ===\n")
+    print("\n=== Teacher Toolkit ===")
     print("1. Lesson plan")
     print("2. Worksheet")
     print("3. Parent email")
 
-    choice = input("\nChoose an option: ").strip()
+    choice = input("\nChoose: ").strip()
 
-    if choice in ["1", "2"]:
-        grade = input("Grade: ").strip()
-        topic = input("Topic: ").strip()
+    if choice == "1":
+        toolkit.create_lesson()
 
-        if not grade:
-            grade = "2nd Grade"
-
-        if not topic:
-            topic = "Addition and subtraction within 100"
-
-        if choice == "2":
-            print("\nGenerating worksheet...\n")
-
-            result = toolkit.generate_worksheet(
-                topic=topic,
-                grade=grade,
-            )
-
-            prefix = "worksheet"
-            title = "Generated Worksheet"
-
-        else:
-            print("\nGenerating lesson plan...\n")
-
-            result = toolkit.generate_lesson(
-                topic=topic,
-                grade=grade,
-            )
-
-            prefix = "lesson_plan"
-            title = "Generated Lesson Plan"
+    elif choice == "2":
+        toolkit.create_worksheet()
 
     elif choice == "3":
-        situation = input("Describe situation: ").strip()
-
-        print("\nGenerating parent email...\n")
-
-        result = toolkit.generate_parent_email(
-            situation=situation
-        )
-
-        prefix = "parent_email"
-        title = "Generated Parent Email"
+        toolkit.create_parent_email()
 
     else:
-        print("Invalid option.")
-        return
+        print("Invalid option")
 
-    print(f"\n=== {title} ===\n")
-    print(result)
-
-    saved_path = toolkit.save_output(
-        result,
-        prefix,
-    )
-
-    print(f"\nSaved to: {saved_path}")
 
 if __name__ == "__main__":
     main()
