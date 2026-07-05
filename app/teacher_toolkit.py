@@ -127,6 +127,63 @@ class TeacherToolkit:
             metadata=quiz_metadata,
         )
 
+    def create_worksheet_from_lesson(self):
+        lessons = self.library.find_by_type("lesson_plan")
+
+        if not lessons:
+            print("\nNo saved lessons found.")
+            return
+
+        print("\n=== Saved Lessons ===\n")
+
+        for index, lesson in enumerate(lessons, start=1):
+            metadata = lesson.get("metadata", {})
+            title = metadata.get("title") or metadata.get("topic") or "Untitled"
+            grade = metadata.get("grade", "")
+
+            if grade:
+                print(f"{index}. {title} | Grade: {grade}")
+            else:
+                print(f"{index}. {title}")
+
+        choice = input("\nSelect lesson: ").strip()
+
+        if not choice.isdigit():
+            print("Invalid selection.")
+            return
+
+        selected_index = int(choice) - 1
+
+        if selected_index < 0 or selected_index >= len(lessons):
+            print("Invalid selection.")
+            return
+
+        lesson = lessons[selected_index]
+        metadata = lesson.get("metadata", {})
+        lesson_content = lesson.get("content", "")
+        grade = metadata.get("grade", "2nd Grade")
+
+        print("\nGenerating worksheet from saved lesson...\n")
+
+        worksheet_generator = self.generators["2"]
+
+        result = worksheet_generator.generate_from_lesson(
+            lesson_content=lesson_content,
+            grade=grade,
+        )
+
+        worksheet_metadata = {
+            "title": f"Worksheet from {metadata.get('title') or metadata.get('topic') or 'Lesson'}",
+            "source_lesson": metadata.get("title") or metadata.get("topic") or "Untitled",
+            "grade": grade,
+        }
+
+        self.finish(
+            result,
+            "worksheet",
+            metadata=worksheet_metadata,
+        )
+
 def main():
     toolkit = TeacherToolkit()
 
@@ -137,10 +194,11 @@ def main():
 
     print("6. View saved resources")
     print("7. Create quiz from saved lesson")
+    print("8. Create worksheet from saved lesson")
 
     choice = input("\nChoose: ").strip()
 
-    if choice not in ["6", "7"] and choice not in GENERATOR_REGISTRY:
+    if choice not in ["6", "7", "8"] and choice not in GENERATOR_REGISTRY:
         print("Invalid option")
         return
 
@@ -195,6 +253,11 @@ def main():
     if choice == "7":
         toolkit.create_quiz_from_lesson()
         return
+
+    if choice == "8":
+        toolkit.create_worksheet_from_lesson()
+        return
+
     
     item = GENERATOR_REGISTRY[choice]
     values = {}

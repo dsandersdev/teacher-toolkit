@@ -19,4 +19,28 @@ class WorksheetGenerator:
             },
         )
 
+    def generate_from_lesson(
+        self,
+        lesson_content: str,
+        grade: str = "2nd Grade",
+    ) -> str:
+        prompt = f"""
+        You are an expert elementary teacher.
+
+        Create a printable worksheet based on the lesson below.
+
+        Grade: {grade}
+
+        Lesson:
+        {lesson_content}
+
+        Include:
+        - student name line
+        - date line
+        - clear directions
+        - 10 practice problems
+        - 2 challenge problems
+        - answer key
+        """
+
         return self.ai.chat(prompt)
