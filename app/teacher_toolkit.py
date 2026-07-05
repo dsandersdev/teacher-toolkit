@@ -8,7 +8,7 @@ from app.exporters.markdown import MarkdownExporter
 from app.exporters.docx import DocxExporter
 from app.exporters.manager import ExportManager
 from app.config.settings import Settings
-
+from app.generators.report_comment import ReportCommentGenerator
 
 class TeacherToolkit:
     def __init__(self):
@@ -22,6 +22,7 @@ class TeacherToolkit:
         self.lessons = LessonGenerator(self.ai)
         self.worksheets = WorksheetGenerator(self.ai)
         self.parent_emails = ParentEmailGenerator(self.ai)
+        self.report_comments = ReportCommentGenerator(self.ai)
 
         exporters = []
 
@@ -92,6 +93,22 @@ class TeacherToolkit:
         for path in saved_paths:
             print(f"- {path}")
 
+    def create_report_comment(self):
+        student_name = input("Student name: ").strip()
+        strengths = input("Strengths: ").strip()
+        growth = input("Areas for growth: ").strip()
+
+        result = self.report_comments.generate(
+            student_name=student_name,
+            strengths=strengths,
+            growth=growth,
+        )
+
+        self.finish(
+            result,
+            "report_comment",
+        )
+
 def main():
     toolkit = TeacherToolkit()
 
@@ -99,6 +116,7 @@ def main():
     print("1. Lesson plan")
     print("2. Worksheet")
     print("3. Parent email")
+    print("4. Report card comment")
 
     choice = input("\nChoose: ").strip()
 
@@ -110,7 +128,8 @@ def main():
 
     elif choice == "3":
         toolkit.create_parent_email()
-
+    elif choice == "4":
+        toolkit.create_report_comment()
     else:
         print("Invalid option")
 
