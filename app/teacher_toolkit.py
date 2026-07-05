@@ -63,10 +63,19 @@ def main():
     item = GENERATOR_REGISTRY[choice]
     values = {}
 
-    for field in item["fields"]:
+    for field, default in item["fields"].items():
         label = field.replace("_", " ").title()
-        values[field] = input(f"{label}: ").strip()
 
+        if default:
+            value = input(
+                f"{label} [{default}]: "
+            ).strip()
+
+        values[field] = value or default
+    else:
+        values[field] = input(
+            f"{label}: "
+        ).strip()
     generator = toolkit.generators[choice]
 
     result = generator.generate(**values)

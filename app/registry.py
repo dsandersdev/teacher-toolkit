@@ -9,24 +9,36 @@ GENERATOR_REGISTRY = {
         "name": "Lesson plan",
         "prefix": "lesson_plan",
         "class": LessonGenerator,
-        "fields": ["grade", "topic"],
+        "fields": {
+            "grade": "2nd Grade",
+            "topic": "",
+        },
     },
     "2": {
         "name": "Worksheet",
         "prefix": "worksheet",
         "class": WorksheetGenerator,
-        "fields": ["grade", "topic"],
+        "fields": {
+            "grade": "2nd Grade",
+            "topic": "",
+        },
     },
     "3": {
         "name": "Parent email",
         "prefix": "parent_email",
         "class": ParentEmailGenerator,
-        "fields": ["situation"],
+        "fields": {
+            "situation": "",
+        },
     },
     "4": {
         "name": "Report card comment",
         "prefix": "report_comment",
         "class": ReportCommentGenerator,
-        "fields": ["student_name", "strengths", "growth"],
+        "fields": {
+            "student_name": "",
+            "strengths": "",
+            "growth": "",
+        },
     },
 }
