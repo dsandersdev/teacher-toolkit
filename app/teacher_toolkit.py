@@ -7,28 +7,31 @@ from app.generators.parent_email import ParentEmailGenerator
 from app.exporters.markdown import MarkdownExporter
 from app.exporters.docx import DocxExporter
 from app.exporters.manager import ExportManager
+from app.config.settings import Settings
 
 
 class TeacherToolkit:
     def __init__(self):
+        self.settings = Settings()
         self.ai = AI(
             AIConfig(
-                provider="ollama",
-                model="qwen3:32b",
+                provider=self.settings.ai_provider,
+                model=self.settings.ai_model,
             )
         )
-
         self.lessons = LessonGenerator(self.ai)
         self.worksheets = WorksheetGenerator(self.ai)
         self.parent_emails = ParentEmailGenerator(self.ai)
 
-        self.export_manager = ExportManager(
-            exporters=[
-                MarkdownExporter(),
-                DocxExporter(),
-            ]
-        )
+        exporters = []
 
+        if self.settings.export_markdown:
+            exporters.append(MarkdownExporter())
+
+        if self.settings.export_docx:
+            exporters.append(DocxExporter())
+
+        self.export_manager = ExportManager(exporters=exporters)
 
     def create_lesson(self):
         grade = input("Grade: ").strip()

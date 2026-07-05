@@ -1,0 +1,8 @@
+ai:
+  provider: ollama
+  model: qwen3:32b
+
+exports:
+  markdown: true
+  docx: true
+  pdf: false
