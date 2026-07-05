@@ -19,6 +19,8 @@ class WorksheetGenerator:
             },
         )
 
+        return self.ai.chat(prompt)
+
     def generate_from_lesson(
         self,
         lesson_content: str,
