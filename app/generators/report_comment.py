@@ -1,6 +1,10 @@
+from app.templates.loader import TemplateLoader
+
+
 class ReportCommentGenerator:
     def __init__(self, ai):
         self.ai = ai
+        self.templates = TemplateLoader()
 
     def generate(
         self,
@@ -9,28 +13,14 @@ class ReportCommentGenerator:
         growth: str,
         tone: str = "professional, supportive, and encouraging",
     ) -> str:
-
-        prompt = f"""
-        You are an experienced elementary teacher.
-
-        Write a personalized report card comment.
-
-        Student:
-        {student_name}
-
-        Strengths:
-        {strengths}
-
-        Areas for growth:
-        {growth}
-
-        Requirements:
-        - Tone: {tone}
-        - Start positively
-        - Mention specific strengths
-        - Address growth areas constructively
-        - Include encouragement for continued progress
-        - Sound natural and teacher-written
-        """
+        prompt = self.templates.render(
+            "report_comment.txt",
+            {
+                "student_name": student_name,
+                "strengths": strengths,
+                "growth": growth,
+                "tone": tone,
+            },
+        )
 
         return self.ai.chat(prompt)

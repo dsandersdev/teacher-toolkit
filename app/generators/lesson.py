@@ -1,27 +1,18 @@
+from app.templates.loader import TemplateLoader
+
+
 class LessonGenerator:
     def __init__(self, ai):
         self.ai = ai
-        
-    def generator(self, topic: str, grade: str) -> str:
-        prompt = f"""
-        You are an expert teacher.
-        
-        Create a complete lesson plan.
-        
-        Grade: {grade}
-        Topic: {topic}
-        
-        Include:
-            - Learning objectives
-            - Standards
-            - Materials
-            - Warm-up
-            - Direct instruction
-            - Direct instruction
-            - Guided practice
-            - Independent practice
-            - Differentiation
-            - Assessment
-            """
+        self.templates = TemplateLoader()
+
+    def generate(self, topic: str, grade: str) -> str:
+        prompt = self.templates.render(
+            "lesson.txt",
+            {
+                "grade": grade,
+                "topic": topic,
+            },
+        )
 
         return self.ai.chat(prompt)

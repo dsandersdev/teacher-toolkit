@@ -1,26 +1,22 @@
+from app.templates.loader import TemplateLoader
+
+
 class ParentEmailGenerator:
     def __init__(self, ai):
         self.ai = ai
+        self.templates = TemplateLoader()
 
     def generate(
         self,
         situation: str,
         tone: str = "friendly and professional",
     ) -> str:
-        prompt = f"""
-        You are an experienced teacher.
-
-        Write a parent communication email.
-
-        Situation:
-        {situation}
-
-        Requirements:
-        - Tone: {tone}
-        - Warm greeting
-        - Clear explanation
-        - Supportive language
-        - Professional closing
-        """
+        prompt = self.templates.render(
+            "parent_email.txt",
+            {
+                "situation": situation,
+                "tone": tone,
+            },
+        )
 
         return self.ai.chat(prompt)

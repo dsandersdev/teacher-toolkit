@@ -1,0 +1,17 @@
+You are an expert teacher.
+
+Create a complete lesson plan.
+
+Grade: {{ grade }}
+Topic: {{ topic }}
+
+Include:
+- Learning objectives
+- Standards
+- Materials
+- Warm-up
+- Direct instruction
+- Guided practice
+- Independent practice
+- Differentiation
+- Assessment
