@@ -26,3 +26,33 @@ class ResourceLibrary:
             for item in self.all()
             if item.get("type") == resource_type
         ]
+
+    def search(self, query: str) -> list[dict]:
+        query = query.lower().strip()
+
+        if not query:
+            return self.all()
+
+        results = []
+
+        for item in self.all():
+            metadata = item.get("metadata", {})
+            content = item.get("content", "")
+
+            searchable_text = " ".join(
+                [
+                    item.get("type", ""),
+                    metadata.get("title", ""),
+                    metadata.get("topic", ""),
+                    metadata.get("student_name", ""),
+                    metadata.get("situation", ""),
+                    metadata.get("grade", ""),
+                    metadata.get("curriculum", ""),
+                    content,
+                ]
+            ).lower()
+
+            if query in searchable_text:
+                results.append(item)
+
+        return results

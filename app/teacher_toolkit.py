@@ -203,7 +203,8 @@ def main():
         return
 
     if choice == "6":
-        resources = toolkit.library.all()
+        query = input("Search saved resources, or press Enter for all: ").strip()
+        resources = toolkit.library.search(query)
 
         print("\n=== Saved Resources ===\n")
 
