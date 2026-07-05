@@ -119,7 +119,11 @@ class TeacherToolkit:
             "source_lesson": metadata.get("title") or metadata.get("topic") or "Untitled",
             "grade": grade,
             "question_count": question_count,
-        }
+            "relationships": {
+                "created_from": lesson.get("id"),
+                "created_from_type": lesson.get("type"),
+            },
+}
 
         self.finish(
             result,
@@ -176,7 +180,11 @@ class TeacherToolkit:
             "title": f"Worksheet from {metadata.get('title') or metadata.get('topic') or 'Lesson'}",
             "source_lesson": metadata.get("title") or metadata.get("topic") or "Untitled",
             "grade": grade,
-        }
+            "relationships": {
+                "created_from": lesson.get("id"),
+                "created_from_type": lesson.get("type"),
+        },
+}
 
         self.finish(
             result,
