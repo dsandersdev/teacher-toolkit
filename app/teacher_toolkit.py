@@ -15,9 +15,12 @@ class TeacherToolkit:
             )
         )
         self.generators = {
-            key: item["class"](self.ai)
-            for key, item in GENERATOR_REGISTRY.items()
-        }
+            key: item["class"](
+            self.ai,
+            self.settings,
+        )
+    for key, item in GENERATOR_REGISTRY.items()
+}
         exporters = []
 
         if self.settings.export_markdown:
@@ -64,6 +67,9 @@ def main():
     values = {}
 
     for field, default in item["fields"].items():
+        if default is None and field == "curriculum":
+            default = toolkit.settings.default_curriculum
+
         label = field.replace("_", " ").title()
 
         if default:

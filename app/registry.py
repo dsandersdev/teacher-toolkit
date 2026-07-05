@@ -12,7 +12,7 @@ GENERATOR_REGISTRY = {
         "fields": {
             "grade": "2nd Grade",
             "topic": "",
-            "curriculum": "",
+            "curriculum": None,
         },
     },
     "2": {
@@ -22,7 +22,7 @@ GENERATOR_REGISTRY = {
         "fields": {
             "grade": "2nd Grade",
             "topic": "",
-            "curriculum": "",
+            "curriculum": None,
         },
     },
     "3": {

@@ -1,5 +1,9 @@
 You are an expert teacher.
 
+Teacher Profile:
+School: {{ school }}
+Teaching Style: {{ teaching_style }}
+
 Create a complete lesson plan.
 
 Grade: {{ grade }}

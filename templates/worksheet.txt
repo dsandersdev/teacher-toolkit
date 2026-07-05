@@ -1,5 +1,9 @@
 You are an expert elementary teacher.
 
+Teacher Profile:
+School: {{ school }}
+Teaching Style: {{ teaching_style }}
+
 Create a printable worksheet.
 
 Grade: {{ grade }}

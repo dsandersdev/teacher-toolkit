@@ -2,6 +2,19 @@ ai:
   provider: ollama
   model: qwen3:32b
 
+teacher:
+  school: BASIS Independent McLean
+  grade_levels:
+    - Kindergarten
+    - 1st Grade
+    - 2nd Grade
+    - 3rd Grade
+    - 4th Grade
+    - 5th Grade
+  teaching_style: rigorous but supportive
+  default_curriculum: ""
+  tone: friendly and professional
+
 exports:
   markdown: true
   docx: true

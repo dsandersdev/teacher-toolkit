@@ -32,3 +32,31 @@ class Settings:
     @property
     def export_docx(self) -> bool:
         return self.data["exports"].get("docx", True)
+
+    @property
+    def school(self) -> str:
+        return self.data["teacher"].get(
+            "school",
+            "",
+        )
+
+    @property
+    def teaching_style(self) -> str:
+        return self.data["teacher"].get(
+            "teaching_style",
+            "",
+        )
+
+    @property
+    def default_curriculum(self) -> str:
+        return self.data["teacher"].get(
+            "default_curriculum",
+            "",
+        )
+
+    @property
+    def tone(self) -> str:
+        return self.data["teacher"].get(
+            "tone",
+            "friendly and professional",
+        )
