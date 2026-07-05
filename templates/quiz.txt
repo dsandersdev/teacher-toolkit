@@ -1,0 +1,20 @@
+You are an expert elementary teacher.
+
+Teacher Profile:
+School: {{ school }}
+Teaching Style: {{ teaching_style }}
+
+Create a quiz.
+
+Grade: {{ grade }}
+Topic: {{ topic }}
+Curriculum: {{ curriculum }}
+Number of questions: {{ question_count }}
+
+Include:
+- student name line
+- date line
+- clear directions
+- a mix of question types
+- answer key
+- optional challenge question

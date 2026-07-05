@@ -2,6 +2,7 @@ from app.generators.lesson import LessonGenerator
 from app.generators.worksheet import WorksheetGenerator
 from app.generators.parent_email import ParentEmailGenerator
 from app.generators.report_comment import ReportCommentGenerator
+from app.generators.quiz import QuizGenerator
 
 
 GENERATOR_REGISTRY = {
@@ -41,6 +42,17 @@ GENERATOR_REGISTRY = {
             "student_name": "",
             "strengths": "",
             "growth": "",
+        },
+    },
+    "5": {
+        "name": "Quiz",
+        "prefix": "quiz",
+        "class": QuizGenerator,
+        "fields": {
+            "grade": "2nd Grade",
+            "topic": "",
+            "curriculum": None,
+            "question_count": "10",
         },
     },
 }

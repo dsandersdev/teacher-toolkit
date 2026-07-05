@@ -4,6 +4,7 @@ from app.exporters.docx import DocxExporter
 from app.exporters.manager import ExportManager
 from app.config.settings import Settings
 from app.registry import GENERATOR_REGISTRY
+from app.exporters.metadata import MetadataExporter
 
 class TeacherToolkit:
     def __init__(self):
@@ -29,6 +30,8 @@ class TeacherToolkit:
         if self.settings.export_docx:
             exporters.append(DocxExporter())
 
+        exporters.append(MetadataExporter())
+
         self.export_manager = ExportManager(exporters=exporters)
 
 
@@ -36,6 +39,7 @@ class TeacherToolkit:
         self,
         content: str,
         prefix: str,
+        metadata: dict | None = None,
     ):
         print("\n")
         print(content)
@@ -43,6 +47,7 @@ class TeacherToolkit:
         saved_paths = self.export_manager.save_all(
             content,
             prefix,
+            metadata,
         )
 
         print("\nSaved files:")
@@ -76,12 +81,11 @@ def main():
             value = input(
                 f"{label} [{default}]: "
             ).strip()
-
-        values[field] = value or default
-    else:
-        values[field] = input(
-            f"{label}: "
-        ).strip()
+            values[field] = value or default
+        else:
+            values[field] = input(
+                f"{label}: "
+            ).strip()
     generator = toolkit.generators[choice]
 
     result = generator.generate(**values)
@@ -89,6 +93,7 @@ def main():
     toolkit.finish(
         result,
         item["prefix"],
+        metadata=values
     )
 
 if __name__ == "__main__":
