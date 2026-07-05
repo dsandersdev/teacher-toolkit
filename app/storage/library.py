@@ -63,3 +63,15 @@ class ResourceLibrary:
                 results.append(item)
 
         return results
+
+    def find_related_to(self, resource_id: str) -> list[dict]:
+        related = []
+
+        for item in self.all():
+            metadata = item.get("metadata", {})
+            relationships = metadata.get("relationships", {})
+
+            if relationships.get("created_from") == resource_id:
+                related.append(item)
+
+        return related

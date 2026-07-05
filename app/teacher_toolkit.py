@@ -191,6 +191,51 @@ class TeacherToolkit:
             "worksheet",
             metadata=worksheet_metadata,
         )
+    def view_lesson_resources(self):
+        lessons = self.library.find_by_type("lesson_plan")
+
+        if not lessons:
+            print("\nNo saved lessons found.")
+            return
+
+        print("\n=== Saved Lessons ===\n")
+
+        for index, lesson in enumerate(lessons, start=1):
+            title = lesson.get("title") or lesson.get("metadata", {}).get("title") or "Untitled"
+            grade = lesson.get("metadata", {}).get("grade", "")
+
+            if grade:
+                print(f"{index}. {title} | Grade: {grade}")
+            else:
+                print(f"{index}. {title}")
+
+        choice = input("\nSelect lesson: ").strip()
+
+        if not choice.isdigit():
+            print("Invalid selection.")
+            return
+
+        selected_index = int(choice) - 1
+
+        if selected_index < 0 or selected_index >= len(lessons):
+            print("Invalid selection.")
+            return
+
+        lesson = lessons[selected_index]
+        related = self.library.find_related_to(lesson.get("id"))
+
+        print("\n=== Related Resources ===\n")
+
+        if not related:
+            print("No related resources found.")
+            return
+
+        for index, resource in enumerate(related, start=1):
+            title = resource.get("title") or resource.get("metadata", {}).get("title") or "Untitled"
+            resource_type = resource.get("type", "unknown")
+            created_at = resource.get("created_at", "")
+
+            print(f"{index}. {resource_type} | {title} | {created_at}")
 
 def main():
     toolkit = TeacherToolkit()
@@ -203,10 +248,11 @@ def main():
     print("6. View saved resources")
     print("7. Create quiz from saved lesson")
     print("8. Create worksheet from saved lesson")
+    print("9. View lesson resources")
 
     choice = input("\nChoose: ").strip()
 
-    if choice not in ["6", "7", "8"] and choice not in GENERATOR_REGISTRY:
+    if choice not in ["6", "7", "8", "9"] and choice not in GENERATOR_REGISTRY:
         print("Invalid option")
         return
 
@@ -293,7 +339,10 @@ def main():
         toolkit.create_worksheet_from_lesson()
         return
 
-    
+    if choice == "9":
+        toolkit.view_lesson_resources()
+        return 
+
     item = GENERATOR_REGISTRY[choice]
     values = {}
 
