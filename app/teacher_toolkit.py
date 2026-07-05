@@ -77,22 +77,45 @@ def main():
 
         print("\n=== Saved Resources ===\n")
 
+        if not resources:
+            print("No saved resources found.")
+            return
+
         for index, resource in enumerate(resources, start=1):
             metadata = resource.get("metadata", {})
 
+            resource_type = resource.get("type", "unknown")
+            created_at = resource.get("created_at", "")
+            grade = metadata.get("grade", "")
+            topic = metadata.get("topic", "")
+            student_name = metadata.get("student_name", "")
+            situation = metadata.get("situation", "")
+
             title = (
-                metadata.get("topic")
-                or metadata.get("student_name")
-                or metadata.get("situation")
+                topic
+                or student_name
+                or situation
                 or "Untitled"
             )
 
-            print(
-                f"{index}. "
-                f"{resource.get('type')} | "
-                f"{title} | "
-                f"{resource.get('created_at')}"
-            )
+            details = []
+
+            if grade:
+                details.append(f"Grade: {grade}")
+
+            if metadata.get("curriculum"):
+                details.append(f"Curriculum: {metadata.get('curriculum')}")
+
+            detail_text = " | ".join(details)
+
+            if detail_text:
+                print(
+                    f"{index}. {resource_type} | {title} | {detail_text} | {created_at}"
+                )
+            else:
+                print(
+                    f"{index}. {resource_type} | {title} | {created_at}"
+                )
 
         return
 
