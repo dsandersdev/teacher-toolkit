@@ -249,6 +249,32 @@ def main():
                     f"{index}. {resource_type} | {title} | {created_at}"
                 )
 
+        open_choice = input(
+            "\nOpen resource number, or press Enter to exit: "
+        ).strip()
+
+        if not open_choice:
+            return
+
+        if not open_choice.isdigit():
+            print("Invalid selection.")
+            return
+
+        selected_index = int(open_choice) - 1
+
+        if selected_index < 0 or selected_index >= len(resources):
+            print("Invalid selection.")
+            return
+
+        selected_resource = resources[selected_index]
+
+        print("\n=== Resource Content ===\n")
+        print(selected_resource.get("content", ""))
+
+        print("\nMetadata:")
+        for key, value in selected_resource.get("metadata", {}).items():
+            print(f"- {key}: {value}")
+
         return
 
     if choice == "7":
