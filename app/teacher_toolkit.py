@@ -14,6 +14,8 @@ from app.repositories.teacher import TeacherRepository
 from app.repositories.resource import ResourceRepository
 from app.repositories.relationship import RelationshipRepository
 from app.repositories.student import StudentRepository
+from app.repositories.assessment import AssessmentRepository
+from app.repositories.gradebook import GradebookRepository
 
 
 class TeacherToolkit:
@@ -56,6 +58,8 @@ class TeacherToolkit:
         self.teacher_repository = TeacherRepository(self.database)
         self.resource_repository = ResourceRepository(self.database)
         self.student_repository = StudentRepository(self.database)
+        self.assessment_repository = AssessmentRepository(self.database)
+        self.gradebook_repository = GradebookRepository(self.database)
         self.relationship_repository = RelationshipRepository(
             self.database
         )
@@ -540,6 +544,183 @@ class TeacherToolkit:
 
         print("Invalid option.")
 
+    def manage_gradebook(self):
+        print("\n=== Gradebook ===\n")
+        print("1. Create assessment")
+        print("2. Enter student scores")
+        print("3. View assessment results")
+        print("4. Find students needing support")
+        print("5. Export Excel (next)")
+
+        choice = input("\nChoose: ").strip()
+
+        if choice == "1":
+            print("\n=== Create Assessment ===\n")
+
+            title = input("Assessment title: ").strip()
+            assessment_type = input("Type [quiz]: ").strip() or "quiz"
+            max_score_text = input("Max score [100]: ").strip() or "100"
+
+            if not title:
+                print("Title is required.")
+                return
+
+            max_score = float(max_score_text)
+
+            assessment_id = self.assessment_repository.save(
+                teacher_id=self.teacher_id,
+                title=title,
+                assessment_type=assessment_type,
+                max_score=max_score,
+            )
+
+            print(f"\nAssessment saved with ID: {assessment_id}")
+            return
+
+        if choice == "2":
+            assessments = self.assessment_repository.list_by_teacher(
+                self.teacher_id
+            )
+
+            if not assessments:
+                print("\nNo assessments found. Create one first.")
+                return
+
+            print("\n=== Assessments ===\n")
+
+            for index, assessment in enumerate(assessments, start=1):
+                print(
+                    f"{index}. {assessment['title']} | Max: {assessment['max_score']}"
+                )
+
+            selected = input("\nChoose assessment: ").strip()
+
+            if not selected.isdigit():
+                print("Invalid option.")
+                return
+
+            index = int(selected) - 1
+
+            if index < 0 or index >= len(assessments):
+                print("Invalid option.")
+                return
+
+            assessment = assessments[index]
+            students = self.student_repository.list_by_teacher(
+                self.teacher_id
+            )
+
+            if not students:
+                print("\nNo students found. Add students first.")
+                return
+
+            print("\n=== Enter Scores ===\n")
+
+            for student in students:
+                name = f"{student['first_name']} {student['last_name']}".strip()
+                score_text = input(
+                    f"{name} score, blank to skip: "
+                ).strip()
+
+                if not score_text:
+                    continue
+
+                self.gradebook_repository.record_score(
+                    student_id=student["id"],
+                    assessment_id=assessment["id"],
+                    score=float(score_text),
+                    max_score=float(assessment["max_score"]),
+                )
+
+            print("\nScores saved.")
+            return
+
+        if choice == "3":
+            assessment = self._select_assessment()
+
+            if not assessment:
+                return
+
+            results = self.gradebook_repository.results_for_assessment(
+                assessment["id"]
+            )
+
+            print("\n=== Assessment Results ===\n")
+
+            if not results:
+                print("No scores found.")
+                return
+
+            for row in results:
+                name = f"{row['first_name']} {row['last_name']}".strip()
+                print(
+                    f"{name}: {row['score']} / {assessment['max_score']} ({row['percent']}%)"
+                )
+
+            return
+
+        if choice == "4":
+            assessment = self._select_assessment()
+
+            if not assessment:
+                return
+
+            threshold_text = input("Threshold percent [70]: ").strip() or "70"
+            threshold = float(threshold_text)
+
+            students = self.gradebook_repository.struggling_students(
+                assessment_id=assessment["id"],
+                threshold=threshold,
+            )
+
+            print("\n=== Students Needing Support ===\n")
+
+            if not students:
+                print("No students below threshold.")
+                return
+
+            for row in students:
+                name = f"{row['first_name']} {row['last_name']}".strip()
+                print(f"{name}: {row['percent']}%")
+
+            return
+
+        if choice == "5":
+            print("\nExcel export coming next.")
+            return
+
+        print("Invalid option.")
+
+    def _select_assessment(self):
+        assessments = self.assessment_repository.list_by_teacher(
+            self.teacher_id
+        )
+
+        if not assessments:
+            print("\nNo assessments found.")
+            return None
+
+        print("\n=== Assessments ===\n")
+
+        for index, assessment in enumerate(assessments, start=1):
+            print(
+                f"{index}. {assessment['title']} | {assessment['assessment_type']} | Max: {assessment['max_score']}"
+            )
+
+        selected = input("\nChoose assessment: ").strip()
+
+        if not selected.isdigit():
+            print("Invalid option.")
+            return None
+
+        index = int(selected) - 1
+
+        if index < 0 or index >= len(assessments):
+            print("Invalid option.")
+            return None
+
+        return assessments[index]
+
 
 def main():
     toolkit = TeacherToolkit()
@@ -555,10 +736,11 @@ def main():
     print("9. View lesson resources")
     print("10. Teacher profiles")
     print("11. Manage students")
+    print("12. Gradebook")
 
     choice = input("\nChoose: ").strip()
 
-    if choice not in ["6", "7", "8", "9", "10", "11"] and choice not in GENERATOR_REGISTRY:
+    if choice not in ["6", "7", "8", "9", "10", "11", "12"] and choice not in GENERATOR_REGISTRY:
         print("Invalid option")
         return
 
@@ -634,6 +816,9 @@ def main():
         toolkit.manage_students()
         return
 
+    if choice == "12":
+        toolkit.manage_gradebook()
+        return
 
         item = GENERATOR_REGISTRY[choice]
     values = {}
