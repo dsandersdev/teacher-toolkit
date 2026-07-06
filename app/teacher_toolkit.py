@@ -211,35 +211,55 @@ class TeacherToolkit:
         print("\n=== Teacher Profiles ===\n")
         print("1. View current profile")
         print("2. Create default profile")
+        print("3. Edit current profile")
 
         choice = input("\nChoose: ").strip()
 
         if choice == "1":
             profile = self.teacher_profile
 
+            grades = getattr(profile, "grades", []) or []
+            subjects = getattr(profile, "subjects", []) or []
+
             print("\n=== Current Profile ===\n")
             print(f"Name: {getattr(profile, 'name', 'Default Settings')}")
             print(f"School: {getattr(profile, 'school', '')}")
-            print(f"Grades: {getattr(profile, 'grades', '')}")
-            print(f"Subjects: {getattr(profile, 'subjects', '')}")
+            print(f"Grades: {', '.join(grades)}")
+            print(f"Subjects: {', '.join(subjects)}")
             print(f"Curriculum: {getattr(profile, 'curriculum', '')}")
             print(f"Teaching Style: {getattr(profile, 'teaching_style', '')}")
             return
 
-        if choice == "2":
+        if choice in ["2", "3"]:
             from app.users.profile import TeacherProfile
 
-            print("\n=== Create Default Teacher Profile ===\n")
+            current = None
 
-            display_name = input("Teacher Name: ").strip()
-            school = input("School: ").strip()
-            grades = input("Grades, comma separated: ").strip()
-            subjects = input("Subjects, comma separated: ").strip()
-            curriculum = input("Curriculum: ").strip()
-            teaching_style = input("Teaching Style: ").strip()
+            if choice == "3":
+                try:
+                    current = self.profile_manager.load("default_teacher")
+                except FileNotFoundError:
+                    print("\nNo profile found. Create one first.")
+                    return
+
+            print("\n=== Teacher Profile ===\n")
+
+            current_name = getattr(current, "name", "") if current else ""
+            current_school = getattr(current, "school", "") if current else ""
+            current_grades = ", ".join(getattr(current, "grades", []) or []) if current else ""
+            current_subjects = ", ".join(getattr(current, "subjects", []) or []) if current else ""
+            current_curriculum = getattr(current, "curriculum", "") if current else ""
+            current_style = getattr(current, "teaching_style", "") if current else ""
+
+            name = input(f"Teacher Name [{current_name}]: ").strip() or current_name
+            school = input(f"School [{current_school}]: ").strip() or current_school
+            grades = input(f"Grades, comma separated [{current_grades}]: ").strip() or current_grades
+            subjects = input(f"Subjects, comma separated [{current_subjects}]: ").strip() or current_subjects
+            curriculum = input(f"Curriculum [{current_curriculum}]: ").strip() or current_curriculum
+            teaching_style = input(f"Teaching Style [{current_style}]: ").strip() or current_style
 
             profile = TeacherProfile(
-                name=display_name,
+                name=name or "default_teacher",
                 school=school,
                 grades=[item.strip() for item in grades.split(",") if item.strip()],
                 subjects=[item.strip() for item in subjects.split(",") if item.strip()],
@@ -252,8 +272,10 @@ class TeacherToolkit:
                 filename="default_teacher",
             )
 
+            self.teacher_profile = profile
+
             print(f"\nProfile saved: {path}")
-            print("Restart Teacher Toolkit to use this profile.")
+            print("Profile updated for this session.")
             return
 
         print("Invalid option.")
