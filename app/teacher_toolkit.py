@@ -9,6 +9,9 @@ from app.registry import GENERATOR_REGISTRY
 from app.storage.library import ResourceLibrary
 from app.users.manager import ProfileManager
 from app.exporters.pdf import PdfExporter
+from app.database.connection import Database
+from app.repositories.teacher import TeacherRepository
+from app.repositories.resource import ResourceRepository
 
 
 class TeacherToolkit:
@@ -44,6 +47,19 @@ class TeacherToolkit:
             print()
             print("No teacher profile found.")
             print("Using default settings.")
+        
+        self.database = Database()
+        self.database.initialize()
+
+        self.teacher_repository = TeacherRepository(self.database)
+        self.resource_repository = ResourceRepository(self.database)
+
+        self.teacher_id = None
+
+        if hasattr(self.teacher_profile, "name"):
+            self.teacher_id = self.teacher_repository.save(
+                self.teacher_profile
+            )
         
         self.ai = AI(
             AIConfig(
@@ -93,6 +109,21 @@ class TeacherToolkit:
         print("\nSaved files:")
         for path in saved_paths:
             print(f"- {path}")
+
+        if self.teacher_id:
+            title = "Untitled"
+
+            if metadata:
+                title = metadata.get("title", title)
+
+            resource_id = self.resource_repository.save(
+                teacher_id=self.teacher_id,
+                resource_type=prefix,
+                title=title,
+                content=content,
+            )
+
+            print(f"- database resource id: {resource_id}")
 
     def build_title(self, values: dict) -> str:
         return (
