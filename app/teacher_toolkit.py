@@ -16,6 +16,7 @@ from app.repositories.relationship import RelationshipRepository
 from app.repositories.student import StudentRepository
 from app.repositories.assessment import AssessmentRepository
 from app.repositories.gradebook import GradebookRepository
+from app.exporters.excel import ExcelGradebookExporter
 
 
 class TeacherToolkit:
@@ -60,6 +61,7 @@ class TeacherToolkit:
         self.student_repository = StudentRepository(self.database)
         self.assessment_repository = AssessmentRepository(self.database)
         self.gradebook_repository = GradebookRepository(self.database)
+        self.excel_exporter = ExcelGradebookExporter()
         self.relationship_repository = RelationshipRepository(
             self.database
         )
@@ -686,9 +688,28 @@ class TeacherToolkit:
             return
 
         if choice == "5":
-            print("\nExcel export coming next.")
+            assessment = self._select_assessment()
+
+            if not assessment:
+                return
+
+            results = self.gradebook_repository.results_for_assessment(
+                assessment["id"]
+            )
+
+            if not results:
+                print("\nNo scores found to export.")
+                return
+
+            output_path = self.excel_exporter.export_assessment_results(
+                assessment,
+                results,
+            )
+
+            print(f"\nExcel exported: {output_path}")
             return
 
+        
         print("Invalid option.")
 
     def _select_assessment(self):
