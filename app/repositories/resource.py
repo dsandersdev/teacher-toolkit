@@ -60,22 +60,36 @@ class ResourceRepository:
 
             return dict(row)
 
-    def search(self, query: str):
+    def search(self, query: str = ""):
         with self.database.connect() as connection:
             cursor = connection.cursor()
 
-            cursor.execute(
-                """
-                SELECT *
-                FROM resources
-                WHERE title LIKE ?
-                OR content LIKE ?
-                """,
-                (
-                    f"%{query}%",
-                    f"%{query}%",
-                ),
-            )
+            query = query.strip()
+
+            if not query:
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM resources
+                    ORDER BY created_at DESC
+                    """
+                )
+            else:
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM resources
+                    WHERE title LIKE ?
+                    OR content LIKE ?
+                    OR type LIKE ?
+                    ORDER BY created_at DESC
+                    """,
+                    (
+                        f"%{query}%",
+                        f"%{query}%",
+                        f"%{query}%",
+                    ),
+                )
 
             return [
                 dict(row)

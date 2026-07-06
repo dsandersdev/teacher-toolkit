@@ -469,7 +469,8 @@ def main():
 
     if choice == "6":
         query = input("Search saved resources, or press Enter for all: ").strip()
-        resources = toolkit.library.search(query)
+        #resources = toolkit.library.search(query)
+        resources = toolkit.resource_repository.search(query)
 
         print("\n=== Saved Resources ===\n")
 
@@ -482,36 +483,11 @@ def main():
 
             resource_type = resource.get("type", "unknown")
             created_at = resource.get("created_at", "")
-            grade = metadata.get("grade", "")
-            topic = metadata.get("topic", "")
-            student_name = metadata.get("student_name", "")
-            situation = metadata.get("situation", "")
+            title = resource.get("title") or "Untitled"
 
-            title = metadata.get("title") or (
-                topic
-                or student_name
-                or situation
-                or "Untitled"
-            )
-
-            details = []
-
-            if grade:
-                details.append(f"Grade: {grade}")
-
-            if metadata.get("curriculum"):
-                details.append(f"Curriculum: {metadata.get('curriculum')}")
-
-            detail_text = " | ".join(details)
-
-            if detail_text:
-                print(
-                    f"{index}. {resource_type} | {title} | {detail_text} | {created_at}"
-                )
-            else:
-                print(
-                    f"{index}. {resource_type} | {title} | {created_at}"
-                )
+        print(
+            f"{index}. {resource_type} | {title} | {created_at}"
+        ) 
 
         open_choice = input(
             "\nOpen resource number, or press Enter to exit: "
@@ -535,9 +511,11 @@ def main():
         print("\n=== Resource Content ===\n")
         print(selected_resource.get("content", ""))
 
-        print("\nMetadata:")
-        for key, value in selected_resource.get("metadata", {}).items():
-            print(f"- {key}: {value}")
+        print("\nDatabase Info:")
+        print(f"- ID: {selected_resource.get('id')}")
+        print(f"- Teacher ID: {selected_resource.get('teacher_id')}")
+        print(f"- Type: {selected_resource.get('type')}")
+        print(f"- Created At: {selected_resource.get('created_at')}")
 
         return
 
