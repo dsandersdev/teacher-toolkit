@@ -17,16 +17,33 @@ class TeacherToolkit:
         self.profile_manager = ProfileManager()
 
         try:
-            self.teacher_profile = self.profile_manager.load("default_teacher")
-            print()
-            print(f"Welcome {self.teacher_profile.name}")
-            print(f"School: {self.teacher_profile.school}")
+            self.teacher_profile = self.profile_manager.get_active()
+
+            if self.teacher_profile is None:
+                profiles = self.profile_manager.list_profiles()
+
+                if profiles:
+                    first = profiles[0]["file"]
+                    self.profile_manager.set_active(first)
+                    self.teacher_profile = self.profile_manager.load(first)
+
+            if self.teacher_profile:
+                print()
+                print(f"Welcome {self.teacher_profile.name}")
+                print(f"School: {self.teacher_profile.school}")
+
+            else:
+                self.teacher_profile = self.settings
+                print()
+                print("No teacher profile found.")
+                print("Using default settings.")
+
         except FileNotFoundError:
             self.teacher_profile = self.settings
             print()
             print("No teacher profile found.")
             print("Using default settings.")
-
+        
         self.ai = AI(
             AIConfig(
                 provider=self.settings.ai_provider,
@@ -207,14 +224,18 @@ class TeacherToolkit:
             metadata=worksheet_metadata,
         )
 
+        
     def manage_profiles(self):
         print("\n=== Teacher Profiles ===\n")
         print("1. View current profile")
-        print("2. Create default profile")
+        print("2. Create new profile")
         print("3. Edit current profile")
+        print("4. Switch profile")
+        print("5. List profiles")
 
         choice = input("\nChoose: ").strip()
 
+        # VIEW CURRENT
         if choice == "1":
             profile = self.teacher_profile
 
@@ -222,7 +243,7 @@ class TeacherToolkit:
             subjects = getattr(profile, "subjects", []) or []
 
             print("\n=== Current Profile ===\n")
-            print(f"Name: {getattr(profile, 'name', 'Default Settings')}")
+            print(f"Name: {getattr(profile, 'name', '')}")
             print(f"School: {getattr(profile, 'school', '')}")
             print(f"Grades: {', '.join(grades)}")
             print(f"Subjects: {', '.join(subjects)}")
@@ -230,17 +251,14 @@ class TeacherToolkit:
             print(f"Teaching Style: {getattr(profile, 'teaching_style', '')}")
             return
 
+        # CREATE OR EDIT
         if choice in ["2", "3"]:
             from app.users.profile import TeacherProfile
 
             current = None
 
             if choice == "3":
-                try:
-                    current = self.profile_manager.load("default_teacher")
-                except FileNotFoundError:
-                    print("\nNo profile found. Create one first.")
-                    return
+                current = self.teacher_profile
 
             print("\n=== Teacher Profile ===\n")
 
@@ -253,33 +271,92 @@ class TeacherToolkit:
 
             name = input(f"Teacher Name [{current_name}]: ").strip() or current_name
             school = input(f"School [{current_school}]: ").strip() or current_school
-            grades = input(f"Grades, comma separated [{current_grades}]: ").strip() or current_grades
-            subjects = input(f"Subjects, comma separated [{current_subjects}]: ").strip() or current_subjects
+            grades = input(f"Grades [{current_grades}]: ").strip() or current_grades
+            subjects = input(f"Subjects [{current_subjects}]: ").strip() or current_subjects
             curriculum = input(f"Curriculum [{current_curriculum}]: ").strip() or current_curriculum
-            teaching_style = input(f"Teaching Style [{current_style}]: ").strip() or current_style
+            style = input(f"Teaching Style [{current_style}]: ").strip() or current_style
 
             profile = TeacherProfile(
-                name=name or "default_teacher",
+                name=name,
                 school=school,
-                grades=[item.strip() for item in grades.split(",") if item.strip()],
-                subjects=[item.strip() for item in subjects.split(",") if item.strip()],
+                grades=[
+                    x.strip()
+                    for x in grades.split(",")
+                    if x.strip()
+                ],
+                subjects=[
+                    x.strip()
+                    for x in subjects.split(",")
+                    if x.strip()
+                ],
                 curriculum=curriculum,
-                teaching_style=teaching_style,
+                teaching_style=style,
             )
 
-            path = self.profile_manager.save(
-                profile,
-                filename="default_teacher",
+            path = self.profile_manager.save(profile)
+
+            self.profile_manager.set_active(
+                path.stem
             )
 
             self.teacher_profile = profile
 
-            print(f"\nProfile saved: {path}")
-            print("Profile updated for this session.")
+            print(f"\nSaved: {path}")
+            print("Profile is now active.")
+            return
+
+        # SWITCH
+        if choice == "4":
+            profiles = self.profile_manager.list_profiles()
+
+            print("\n=== Available Profiles ===\n")
+
+            for index, profile in enumerate(profiles, start=1):
+                print(
+                    f"{index}. {profile['name']}"
+                )
+
+            selected = input("\nChoose profile: ").strip()
+
+            if not selected.isdigit():
+                print("Invalid option.")
+                return
+
+            index = int(selected) - 1
+
+            if index < 0 or index >= len(profiles):
+                print("Invalid option.")
+                return
+
+            selected_profile = profiles[index]
+
+            self.profile_manager.set_active(
+                selected_profile["file"]
+            )
+
+            self.teacher_profile = (
+                self.profile_manager.get_active()
+            )
+
+            print(
+                f"\nSwitched to {self.teacher_profile.name}"
+            )
+
+            return
+
+        # LIST
+        if choice == "5":
+            profiles = self.profile_manager.list_profiles()
+
+            print("\n=== Profiles ===\n")
+
+            for profile in profiles:
+                print(f"- {profile['name']}")
+
             return
 
         print("Invalid option.")
-    
+        
     def view_lesson_resources(self):
         lessons = self.library.find_by_type("lesson_plan")
 
