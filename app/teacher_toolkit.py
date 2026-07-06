@@ -724,21 +724,46 @@ class TeacherToolkit:
             threshold_text = input("Threshold percent [70]: ").strip() or "70"
             threshold = float(threshold_text)
 
+            all_results = self.gradebook_repository.results_for_assessment(
+                assessment["id"]
+            )
+
+            if not all_results:
+                print(
+                    "\nNo scores have been entered for this assessment yet."
+                )
+                return
+
             students = self.gradebook_repository.struggling_students(
                 assessment_id=assessment["id"],
                 threshold=threshold,
             )
 
+            print("\n=== Students Needing Support ===\n")
+
             if not students:
-                print("\nNo students below threshold.")
+                print("All students are above the threshold.")
                 return
 
+            for row in students:
+                name = (
+                    f"{row['first_name']} "
+                    f"{row['last_name']}"
+                ).strip()
+
+                print(
+                    f"{name}: {row['percent']}%"
+                )
+
             student_names = [
-                f"{row['first_name']} {row['last_name']}".strip()
+                (
+                    f"{row['first_name']} "
+                    f"{row['last_name']}"
+                ).strip()
                 for row in students
             ]
 
-            grade = input("Grade level: ").strip()
+            grade = input("\nGrade level: ").strip()
 
             print("\nGenerating intervention plan...\n")
 
@@ -749,7 +774,10 @@ class TeacherToolkit:
             )
 
             metadata = {
-                "title": f"Intervention for {assessment['title']}",
+                "title": (
+                    f"Intervention for "
+                    f"{assessment['title']}"
+                ),
                 "assessment": assessment["title"],
                 "threshold": threshold,
                 "students": ", ".join(student_names),

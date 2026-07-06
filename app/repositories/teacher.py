@@ -5,10 +5,12 @@ class TeacherRepository:
     def __init__(self, database):
         self.database = database
 
-    def save(
-        self,
-        profile: TeacherProfile,
-    ):
+    def save(self, profile: TeacherProfile):
+        existing = self.find_by_name(profile.name)
+
+        if existing:
+            return existing["id"]
+
         with self.database.connect() as connection:
             cursor = connection.cursor()
 
@@ -32,7 +34,6 @@ class TeacherRepository:
             )
 
             connection.commit()
-
             return cursor.lastrowid
 
     def get(self, teacher_id: int):
@@ -49,8 +50,20 @@ class TeacherRepository:
             )
 
             row = cursor.fetchone()
+            return dict(row) if row else None
 
-            if not row:
-                return None
+    def find_by_name(self, name: str):
+        with self.database.connect() as connection:
+            cursor = connection.cursor()
 
-            return dict(row)
+            cursor.execute(
+                """
+                SELECT *
+                FROM teachers
+                WHERE name = ?
+                """,
+                (name,),
+            )
+
+            row = cursor.fetchone()
+            return dict(row) if row else None
