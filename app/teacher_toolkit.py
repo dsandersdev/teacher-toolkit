@@ -17,6 +17,7 @@ from app.repositories.student import StudentRepository
 from app.repositories.assessment import AssessmentRepository
 from app.repositories.gradebook import GradebookRepository
 from app.exporters.excel import ExcelGradebookExporter
+from app.generators.intervention import InterventionGenerator
 
 
 class TeacherToolkit:
@@ -78,6 +79,10 @@ class TeacherToolkit:
                 provider=self.settings.ai_provider,
                 model=self.settings.ai_model,
             )
+        )
+        self.intervention_generator = InterventionGenerator(
+            self.ai,
+            self.teacher_profile,
         )
 
         self.generators = {
@@ -553,6 +558,7 @@ class TeacherToolkit:
         print("3. View assessment results")
         print("4. Find students needing support")
         print("5. Export Excel (next)")
+        print("6. Generate intervention group")
 
         choice = input("\nChoose: ").strip()
 
@@ -709,7 +715,55 @@ class TeacherToolkit:
             print(f"\nExcel exported: {output_path}")
             return
 
-        
+        if choice == "6":
+            assessment = self._select_assessment()
+
+            if not assessment:
+                return
+
+            threshold_text = input("Threshold percent [70]: ").strip() or "70"
+            threshold = float(threshold_text)
+
+            students = self.gradebook_repository.struggling_students(
+                assessment_id=assessment["id"],
+                threshold=threshold,
+            )
+
+            if not students:
+                print("\nNo students below threshold.")
+                return
+
+            student_names = [
+                f"{row['first_name']} {row['last_name']}".strip()
+                for row in students
+            ]
+
+            grade = input("Grade level: ").strip()
+
+            print("\nGenerating intervention plan...\n")
+
+            result = self.intervention_generator.generate(
+                assessment_title=assessment["title"],
+                students=", ".join(student_names),
+                grade=grade,
+            )
+
+            metadata = {
+                "title": f"Intervention for {assessment['title']}",
+                "assessment": assessment["title"],
+                "threshold": threshold,
+                "students": ", ".join(student_names),
+                "grade": grade,
+            }
+
+            self.finish(
+                result,
+                "intervention",
+                metadata=metadata,
+            )
+
+            return
+
         print("Invalid option.")
 
     def _select_assessment(self):
