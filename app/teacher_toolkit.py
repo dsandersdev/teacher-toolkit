@@ -8,6 +8,7 @@ from app.exporters.metadata import MetadataExporter
 from app.registry import GENERATOR_REGISTRY
 from app.storage.library import ResourceLibrary
 from app.users.manager import ProfileManager
+from app.exporters.pdf import PdfExporter
 
 
 class TeacherToolkit:
@@ -66,6 +67,9 @@ class TeacherToolkit:
 
         if self.settings.export_docx:
             exporters.append(DocxExporter())
+
+        if getattr(self.settings, "export_pdf", False):
+            exporters.append(PdfExporter())
 
         exporters.append(MetadataExporter())
 
@@ -526,6 +530,12 @@ def main():
     values = {}
 
     profile = toolkit.teacher_profile
+
+    item = GENERATOR_REGISTRY[choice]
+    values = {}
+
+    #print("DEBUG choice:", choice)
+    #print("DEBUG item:", item)
 
     for field, default in item["fields"].items():
 

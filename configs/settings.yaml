@@ -18,4 +18,4 @@ teacher:
 exports:
   markdown: true
   docx: true
-  pdf: false
+  pdf: true

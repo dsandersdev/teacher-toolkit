@@ -34,6 +34,10 @@ class Settings:
         return self.data["exports"].get("docx", True)
 
     @property
+    def export_pdf(self) -> bool:
+        return self.data["exports"].get("pdf", False)
+
+    @property
     def school(self) -> str:
         return self.data["teacher"].get(
             "school",
