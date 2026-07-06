@@ -95,3 +95,29 @@ class ResourceRepository:
                 dict(row)
                 for row in cursor.fetchall()
             ]
+
+            
+            
+    def find_by_type(
+        self,
+        resource_type: str,
+    ):
+        with self.database.connect() as connection:
+            cursor = connection.cursor()
+
+            cursor.execute(
+                """
+                SELECT *
+                FROM resources
+                WHERE type = ?
+                ORDER BY created_at DESC
+                """,
+                (
+                    resource_type,
+                ),
+            )
+
+            return [
+                dict(row)
+                for row in cursor.fetchall()
+            ]

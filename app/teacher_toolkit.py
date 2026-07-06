@@ -134,7 +134,9 @@ class TeacherToolkit:
         )
 
     def create_quiz_from_lesson(self):
-        lessons = self.library.find_by_type("lesson_plan")
+        lessons = self.resource_repository.find_by_type(
+            "lesson_plan"
+        )
 
         if not lessons:
             print("\nNo saved lessons found.")
@@ -143,7 +145,9 @@ class TeacherToolkit:
         print("\n=== Saved Lessons ===\n")
 
         for index, lesson in enumerate(lessons, start=1):
-            metadata = lesson.get("metadata", {})
+            metadata = {
+                "title": lesson.get("title"),
+            }
             title = metadata.get("title") or metadata.get("topic") or "Untitled"
             grade = metadata.get("grade", "")
 
@@ -165,7 +169,9 @@ class TeacherToolkit:
             return
 
         lesson = lessons[selected_index]
-        metadata = lesson.get("metadata", {})
+        metadata = {
+            "title": lesson.get("title"),
+        }
         lesson_content = lesson.get("content", "")
         grade = metadata.get("grade", "2nd Grade")
 
@@ -199,7 +205,9 @@ class TeacherToolkit:
         )
 
     def create_worksheet_from_lesson(self):
-        lessons = self.library.find_by_type("lesson_plan")
+        lessons = self.resource_repository.find_by_type(
+            "lesson_plan"
+        )
 
         if not lessons:
             print("\nNo saved lessons found.")
@@ -208,7 +216,9 @@ class TeacherToolkit:
         print("\n=== Saved Lessons ===\n")
 
         for index, lesson in enumerate(lessons, start=1):
-            metadata = lesson.get("metadata", {})
+            metadata = {
+                "title": lesson.get("title"),
+            }
             title = metadata.get("title") or metadata.get("topic") or "Untitled"
             grade = metadata.get("grade", "")
 
@@ -230,7 +240,9 @@ class TeacherToolkit:
             return
 
         lesson = lessons[selected_index]
-        metadata = lesson.get("metadata", {})
+        metadata = {
+            "title": lesson.get("title"),
+        }
         lesson_content = lesson.get("content", "")
         grade = metadata.get("grade", "2nd Grade")
 
@@ -393,7 +405,9 @@ class TeacherToolkit:
         print("Invalid option.")
         
     def view_lesson_resources(self):
-        lessons = self.library.find_by_type("lesson_plan")
+        lessons = self.resource_repository.find_by_type(
+            "lesson_plan"
+        )
 
         if not lessons:
             print("\nNo saved lessons found.")
