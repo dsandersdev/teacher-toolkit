@@ -231,7 +231,7 @@ class TeacherToolkit:
 
             print("\n=== Create Default Teacher Profile ===\n")
 
-            name = input("Name [default_teacher]: ").strip() or "default_teacher"
+            display_name = input("Teacher Name: ").strip()
             school = input("School: ").strip()
             grades = input("Grades, comma separated: ").strip()
             subjects = input("Subjects, comma separated: ").strip()
@@ -239,7 +239,7 @@ class TeacherToolkit:
             teaching_style = input("Teaching Style: ").strip()
 
             profile = TeacherProfile(
-                name=name,
+                name=display_name,
                 school=school,
                 grades=[item.strip() for item in grades.split(",") if item.strip()],
                 subjects=[item.strip() for item in subjects.split(",") if item.strip()],
@@ -247,7 +247,10 @@ class TeacherToolkit:
                 teaching_style=teaching_style,
             )
 
-            path = self.profile_manager.save(profile)
+            path = self.profile_manager.save(
+                profile,
+                filename="default_teacher",
+            )
 
             print(f"\nProfile saved: {path}")
             print("Restart Teacher Toolkit to use this profile.")
@@ -420,20 +423,51 @@ def main():
         toolkit.manage_profiles()
         return
 
-    item = GENERATOR_REGISTRY[choice]
+        item = GENERATOR_REGISTRY[choice]
     values = {}
 
+    profile = toolkit.teacher_profile
+
     for field, default in item["fields"].items():
-        if default is None and field == "curriculum":
+
+        # curriculum from profile
+        if field == "curriculum":
+            profile_curriculum = getattr(
+                profile,
+                "curriculum",
+                None,
+            )
+
+            if profile_curriculum:
+                values[field] = profile_curriculum
+                continue
+
             default = toolkit.settings.default_curriculum
+
+        # grade from profile
+        if field == "grade":
+            profile_grades = getattr(
+                profile,
+                "grades",
+                None,
+            )
+
+            if profile_grades:
+                default = profile_grades[0]
 
         label = field.replace("_", " ").title()
 
         if default:
-            value = input(f"{label} [{default}]: ").strip()
+            value = input(
+                f"{label} [{default}]: "
+            ).strip()
+
             values[field] = value or default
+
         else:
-            values[field] = input(f"{label}: ").strip()
+            values[field] = input(
+                f"{label}: "
+            ).strip()
 
     generator = toolkit.generators[choice]
 

@@ -9,8 +9,9 @@ class ProfileManager:
         self.profile_dir = Path(profile_dir)
         self.profile_dir.mkdir(exist_ok=True)
 
-    def save(self, profile: TeacherProfile):
-        path = self.profile_dir / f"{profile.name}.json"
+    def save(self, profile: TeacherProfile, filename: str | None = None):
+        file_name = filename or profile.name
+        path = self.profile_dir / f"{file_name}.json"
 
         path.write_text(
             json.dumps(
