@@ -207,6 +207,54 @@ class TeacherToolkit:
             metadata=worksheet_metadata,
         )
 
+    def manage_profiles(self):
+        print("\n=== Teacher Profiles ===\n")
+        print("1. View current profile")
+        print("2. Create default profile")
+
+        choice = input("\nChoose: ").strip()
+
+        if choice == "1":
+            profile = self.teacher_profile
+
+            print("\n=== Current Profile ===\n")
+            print(f"Name: {getattr(profile, 'name', 'Default Settings')}")
+            print(f"School: {getattr(profile, 'school', '')}")
+            print(f"Grades: {getattr(profile, 'grades', '')}")
+            print(f"Subjects: {getattr(profile, 'subjects', '')}")
+            print(f"Curriculum: {getattr(profile, 'curriculum', '')}")
+            print(f"Teaching Style: {getattr(profile, 'teaching_style', '')}")
+            return
+
+        if choice == "2":
+            from app.users.profile import TeacherProfile
+
+            print("\n=== Create Default Teacher Profile ===\n")
+
+            name = input("Name [default_teacher]: ").strip() or "default_teacher"
+            school = input("School: ").strip()
+            grades = input("Grades, comma separated: ").strip()
+            subjects = input("Subjects, comma separated: ").strip()
+            curriculum = input("Curriculum: ").strip()
+            teaching_style = input("Teaching Style: ").strip()
+
+            profile = TeacherProfile(
+                name=name,
+                school=school,
+                grades=[item.strip() for item in grades.split(",") if item.strip()],
+                subjects=[item.strip() for item in subjects.split(",") if item.strip()],
+                curriculum=curriculum,
+                teaching_style=teaching_style,
+            )
+
+            path = self.profile_manager.save(profile)
+
+            print(f"\nProfile saved: {path}")
+            print("Restart Teacher Toolkit to use this profile.")
+            return
+
+        print("Invalid option.")
+    
     def view_lesson_resources(self):
         lessons = self.library.find_by_type("lesson_plan")
 
@@ -274,10 +322,11 @@ def main():
     print("7. Create quiz from saved lesson")
     print("8. Create worksheet from saved lesson")
     print("9. View lesson resources")
+    print("10. Teacher profiles")
 
     choice = input("\nChoose: ").strip()
 
-    if choice not in ["6", "7", "8", "9"] and choice not in GENERATOR_REGISTRY:
+    if choice not in ["6", "7", "8", "9", "10"] and choice not in GENERATOR_REGISTRY:
         print("Invalid option")
         return
 
@@ -365,6 +414,10 @@ def main():
 
     if choice == "9":
         toolkit.view_lesson_resources()
+        return
+
+    if choice == "10":
+        toolkit.manage_profiles()
         return
 
     item = GENERATOR_REGISTRY[choice]
