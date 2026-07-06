@@ -12,6 +12,7 @@ from app.exporters.pdf import PdfExporter
 from app.database.connection import Database
 from app.repositories.teacher import TeacherRepository
 from app.repositories.resource import ResourceRepository
+from app.repositories.relationship import RelationshipRepository
 
 
 class TeacherToolkit:
@@ -53,6 +54,9 @@ class TeacherToolkit:
 
         self.teacher_repository = TeacherRepository(self.database)
         self.resource_repository = ResourceRepository(self.database)
+        self.relationship_repository = RelationshipRepository(
+            self.database
+        )
 
         self.teacher_id = None
 
@@ -124,6 +128,7 @@ class TeacherToolkit:
             )
 
             print(f"- database resource id: {resource_id}")
+            return resource_id
 
     def build_title(self, values: dict) -> str:
         return (
@@ -198,11 +203,20 @@ class TeacherToolkit:
             },
         }
 
-        self.finish(
+        quiz_id = self.finish(
             result,
             "quiz",
-            metadata=quiz_metadata,
+            metadata,
         )
+
+        if quiz_id:
+            self.relationship_repository.save(
+                source_id=lesson["id"],
+                target_id=quiz_id,
+                relationship_type="quiz",
+            )
+
+
 
     def create_worksheet_from_lesson(self):
         lessons = self.resource_repository.find_by_type(
@@ -265,12 +279,18 @@ class TeacherToolkit:
             },
         }
 
-        self.finish(
+        worksheet_id = self.finish(
             result,
             "worksheet",
-            metadata=worksheet_metadata,
+            metadata,
         )
 
+        if worksheet_id:
+            self.relationship_repository.save(
+                source_id=lesson["id"],
+                target_id=worksheet_id,
+                relationship_type="worksheet",
+            )
         
     def manage_profiles(self):
         print("\n=== Teacher Profiles ===\n")
