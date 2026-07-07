@@ -21,6 +21,7 @@ from app.generators.intervention import InterventionGenerator
 from app.generators.worksheet import WorksheetGenerator
 from app.generators.quiz import QuizGenerator
 from app.modules.gradebook import GradebookModule
+from app.modules.students import StudentModule
 
 
 class TeacherToolkit:
@@ -67,6 +68,7 @@ class TeacherToolkit:
         self.gradebook_repository = GradebookRepository(self.database)
         self.excel_exporter = ExcelGradebookExporter()
         self.gradebook_module = GradebookModule(self)
+        self.student_module = StudentModule(self)
         self.relationship_repository = RelationshipRepository(
             self.database
         )
@@ -507,63 +509,6 @@ class TeacherToolkit:
 
             print(f"{index}. {resource_type} | {title} | {created_at}")
 
-    def manage_students(self):
-        print("\n=== Students ===\n")
-        print("1. List students")
-        print("2. Add student")
-        print("3. Import students from file (future)")
-        print("4. View student performance (future)")
-
-        choice = input("\nChoose: ").strip()
-
-        if choice == "1":
-            students = self.student_repository.list_by_teacher(
-                self.teacher_id
-            )
-
-            print("\n=== Student List ===\n")
-
-            if not students:
-                print("No students found.")
-                return
-
-            for index, student in enumerate(students, start=1):
-                name = f"{student.get('first_name', '')} {student.get('last_name', '')}".strip()
-                grade = student.get("grade_level", "")
-
-                if grade:
-                    print(f"{index}. {name} | Grade: {grade}")
-                else:
-                    print(f"{index}. {name}")
-
-            return
-
-        if choice == "2":
-            print("\n=== Add Student ===\n")
-
-            first_name = input("First name: ").strip()
-            last_name = input("Last name: ").strip()
-            grade_level = input("Grade level: ").strip()
-
-            if not first_name:
-                print("First name is required.")
-                return
-
-            student_id = self.student_repository.save(
-                teacher_id=self.teacher_id,
-                first_name=first_name,
-                last_name=last_name,
-                grade_level=grade_level,
-            )
-
-            print(f"\nStudent saved with ID: {student_id}")
-            return
-
-        if choice in ["3", "4"]:
-            print("\nComing soon.")
-            return
-
-        print("Invalid option.")
 
     def _select_assessment(self):
         assessments = self.assessment_repository.list_by_teacher(
@@ -687,7 +632,7 @@ def main():
         return
 
     if choice == "11":
-        toolkit.manage_students()
+        toolkit.student_module.run()
         return
 
     if choice == "12":
