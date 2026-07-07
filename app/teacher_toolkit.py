@@ -23,6 +23,7 @@ from app.generators.quiz import QuizGenerator
 from app.modules.gradebook import GradebookModule
 from app.modules.students import StudentModule
 from app.modules.profiles import ProfileModule
+from app.modules.resources import ResourceModule
 
 
 class TeacherToolkit:
@@ -71,6 +72,8 @@ class TeacherToolkit:
         self.gradebook_module = GradebookModule(self)
         self.student_module = StudentModule(self)
         self.profile_module = ProfileModule(self)
+        self.resource_module = ProfileModule(self)
+        self.resource_module = ResourceModule(self)
         self.relationship_repository = RelationshipRepository(
             self.database
         )
@@ -169,216 +172,6 @@ class TeacherToolkit:
             or "Untitled"
         )
 
-    def create_quiz_from_lesson(self):
-        lessons = self.resource_repository.find_by_type(
-            "lesson_plan"
-        )
-
-        if not lessons:
-            print("\nNo saved lessons found.")
-            return
-
-        print("\n=== Saved Lessons ===\n")
-
-        for index, lesson in enumerate(lessons, start=1):
-            metadata = {
-                "title": lesson.get("title"),
-            }
-            title = metadata.get("title") or metadata.get("topic") or "Untitled"
-            grade = metadata.get("grade", "")
-
-            if grade:
-                print(f"{index}. {title} | Grade: {grade}")
-            else:
-                print(f"{index}. {title}")
-
-        choice = input("\nSelect lesson: ").strip()
-
-        if not choice.isdigit():
-            print("Invalid selection.")
-            return
-
-        selected_index = int(choice) - 1
-
-        if selected_index < 0 or selected_index >= len(lessons):
-            print("Invalid selection.")
-            return
-
-        lesson = lessons[selected_index]
-        metadata = {
-            "title": lesson.get("title"),
-        }
-        lesson_content = lesson.get("content", "")
-        grade = metadata.get("grade", "2nd Grade")
-
-        question_count = input("Question Count [10]: ").strip() or "10"
-
-        print("\nGenerating quiz from saved lesson...\n")
-
-        quiz_generator = self.generators["5"]
-
-        result = quiz_generator.generate_from_lesson(
-            lesson_content=lesson_content,
-            grade=grade,
-            question_count=question_count,
-        )
-
-        quiz_metadata = {
-            "title": f"Quiz from {metadata.get('title') or metadata.get('topic') or 'Lesson'}",
-            "source_lesson": metadata.get("title") or metadata.get("topic") or "Untitled",
-            "grade": grade,
-            "question_count": question_count,
-            "relationships": {
-                "created_from": lesson.get("id"),
-                "created_from_type": lesson.get("type"),
-            },
-        }
-
-        quiz_id = self.finish(
-            result,
-            "quiz",
-            metadata,
-        )
-
-        if quiz_id:
-            self.relationship_repository.save(
-                source_id=lesson["id"],
-                target_id=quiz_id,
-                relationship_type="quiz",
-            )
-
-
-
-    def create_worksheet_from_lesson(self):
-        lessons = self.resource_repository.find_by_type(
-            "lesson_plan"
-        )
-
-        if not lessons:
-            print("\nNo saved lessons found.")
-            return
-
-        print("\n=== Saved Lessons ===\n")
-
-        for index, lesson in enumerate(lessons, start=1):
-            metadata = {
-                "title": lesson.get("title"),
-            }
-            title = metadata.get("title") or metadata.get("topic") or "Untitled"
-            grade = metadata.get("grade", "")
-
-            if grade:
-                print(f"{index}. {title} | Grade: {grade}")
-            else:
-                print(f"{index}. {title}")
-
-        choice = input("\nSelect lesson: ").strip()
-
-        if not choice.isdigit():
-            print("Invalid selection.")
-            return
-
-        selected_index = int(choice) - 1
-
-        if selected_index < 0 or selected_index >= len(lessons):
-            print("Invalid selection.")
-            return
-
-        lesson = lessons[selected_index]
-        metadata = {
-            "title": lesson.get("title"),
-        }
-        lesson_content = lesson.get("content", "")
-        grade = metadata.get("grade", "2nd Grade")
-
-        print("\nGenerating worksheet from saved lesson...\n")
-
-        worksheet_generator = self.generators["2"]
-
-        result = worksheet_generator.generate_from_lesson(
-            lesson_content=lesson_content,
-            grade=grade,
-        )
-
-        worksheet_metadata = {
-            "title": f"Worksheet from {metadata.get('title') or metadata.get('topic') or 'Lesson'}",
-            "source_lesson": metadata.get("title") or metadata.get("topic") or "Untitled",
-            "grade": grade,
-            "relationships": {
-                "created_from": lesson.get("id"),
-                "created_from_type": lesson.get("type"),
-            },
-        }
-
-        worksheet_id = self.finish(
-            result,
-            "worksheet",
-            metadata,
-        )
-
-        if worksheet_id:
-            self.relationship_repository.save(
-                source_id=lesson["id"],
-                target_id=worksheet_id,
-                relationship_type="worksheet",
-            )
-        
-        
-    def view_lesson_resources(self):
-        lessons = self.resource_repository.find_by_type(
-            "lesson_plan"
-        )
-
-        if not lessons:
-            print("\nNo saved lessons found.")
-            return
-
-        print("\n=== Saved Lessons ===\n")
-
-        for index, lesson in enumerate(lessons, start=1):
-            title = (
-                lesson.get("title")
-                or lesson.get("metadata", {}).get("title")
-                or "Untitled"
-            )
-            grade = lesson.get("metadata", {}).get("grade", "")
-
-            if grade:
-                print(f"{index}. {title} | Grade: {grade}")
-            else:
-                print(f"{index}. {title}")
-
-        choice = input("\nSelect lesson: ").strip()
-
-        if not choice.isdigit():
-            print("Invalid selection.")
-            return
-
-        selected_index = int(choice) - 1
-
-        if selected_index < 0 or selected_index >= len(lessons):
-            print("Invalid selection.")
-            return
-
-        lesson = lessons[selected_index]
-        related = self.library.find_related_to(lesson.get("id"))
-
-        print("\n=== Related Resources ===\n")
-
-        if not related:
-            print("No related resources found.")
-            return
-
-        for index, resource in enumerate(related, start=1):
-            title = (
-                resource.get("title")
-                or resource.get("metadata", {}).get("title")
-                or "Untitled"
-            )
-            resource_type = resource.get("type", "unknown")
-            created_at = resource.get("created_at", "")
-
-            print(f"{index}. {resource_type} | {title} | {created_at}")
 
 
     def _select_assessment(self):
@@ -435,67 +228,19 @@ def main():
         return
 
     if choice == "6":
-        query = input("Search saved resources, or press Enter for all: ").strip()
-        #resources = toolkit.library.search(query)
-        resources = toolkit.resource_repository.search(query)
-
-        print("\n=== Saved Resources ===\n")
-
-        if not resources:
-            print("No saved resources found.")
-            return
-
-        for index, resource in enumerate(resources, start=1):
-            metadata = resource.get("metadata", {})
-
-            resource_type = resource.get("type", "unknown")
-            created_at = resource.get("created_at", "")
-            title = resource.get("title") or "Untitled"
-
-        print(
-            f"{index}. {resource_type} | {title} | {created_at}"
-        ) 
-
-        open_choice = input(
-            "\nOpen resource number, or press Enter to exit: "
-        ).strip()
-
-        if not open_choice:
-            return
-
-        if not open_choice.isdigit():
-            print("Invalid selection.")
-            return
-
-        selected_index = int(open_choice) - 1
-
-        if selected_index < 0 or selected_index >= len(resources):
-            print("Invalid selection.")
-            return
-
-        selected_resource = resources[selected_index]
-
-        print("\n=== Resource Content ===\n")
-        print(selected_resource.get("content", ""))
-
-        print("\nDatabase Info:")
-        print(f"- ID: {selected_resource.get('id')}")
-        print(f"- Teacher ID: {selected_resource.get('teacher_id')}")
-        print(f"- Type: {selected_resource.get('type')}")
-        print(f"- Created At: {selected_resource.get('created_at')}")
-
+        toolkit.resource_module.view_saved_resources()
         return
 
     if choice == "7":
-        toolkit.create_quiz_from_lesson()
+        toolkit.resource_module.create_quiz_from_lesson()
         return
 
     if choice == "8":
-        toolkit.create_worksheet_from_lesson()
+        toolkit.resource_module.create_worksheet_from_lesson()
         return
 
     if choice == "9":
-        toolkit.view_lesson_resources()
+        toolkit.resource_module.view_lesson_resources()
         return
 
     if choice == "10":
