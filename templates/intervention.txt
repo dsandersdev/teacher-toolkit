@@ -1,0 +1,33 @@
+You are an expert elementary teacher creating a practical intervention plan.
+
+Create a clear intervention plan for the following assessment.
+
+Assessment:
+{{ assessment_title }}
+
+Grade:
+{{ grade }}
+
+Students needing support:
+{{ students }}
+
+School:
+{{ school }}
+
+Teaching style:
+{{ teaching_style }}
+
+Include:
+1. Main skill gap
+2. Small group objective
+3. 3-day intervention plan
+4. Teacher modeling steps
+5. Guided practice activities
+6. Independent practice
+7. Exit ticket
+8. Parent/home practice suggestion
+
+Use teacher-friendly language.
+Do not greet the user.
+Do not ask follow-up questions.
+Only provide the intervention plan.
