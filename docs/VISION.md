@@ -1,58 +1,186 @@
 # Teacher Toolkit Vision
 
-Teacher Toolkit is an AI-powered assistant for teachers.
+Teacher Toolkit is an AI-powered teaching platform designed to reduce teacher workload while improving personalized student support.
 
-Its purpose is to help educators quickly create high-quality classroom materials, lesson plans, worksheets, parent communications, report card comments, newsletters, and differentiated student supports.
+The goal is not only to generate content, but to create a complete teaching workflow.
 
-The project is built on top of the AI SDK and will serve as a real-world application that helps guide future SDK improvements.
+---
 
-## Primary Goals
+# Mission
 
-- Save teachers time.
-- Produce polished classroom-ready materials.
-- Support lesson planning and differentiation.
-- Help with parent and school communication.
-- Generate reusable teaching resources.
-- Keep outputs organized by project workspace.
+Help teachers:
 
-## Core Areas
+- Plan faster
+- Create better resources
+- Understand student needs
+- Provide targeted support
+- Communicate effectively with families
 
-### Lesson Planning
+---
 
-- Lesson plans
-- Unit plans
-- Scope and sequence
-- Standards alignment
-- Differentiation ideas
+# Core Idea
 
-### Classroom Materials
+Traditional teacher workflow:
 
-- Worksheets
-- Quizzes
-- Exit tickets
-- Homework
-- Slideshows
-- Classroom games
-- Rubrics
+```text
+Plan lesson
+    ↓
+Teach
+    ↓
+Assess
+    ↓
+Analyze data
+    ↓
+Create interventions
+    ↓
+Communicate progress
+```
 
-### Communication
+Teacher Toolkit connects this entire cycle.
 
-- Parent emails
-- Newsletters
-- Report card comments
-- Conference notes
-- Behavior updates
+---
 
-### Student Support
+# AI Teaching Assistant Workflow
 
-- RTI support
-- Intervention plans
-- Small group activities
-- Extension activities
-- Re-teaching materials
+```text
+Teacher Profile
+        ↓
+AI understands:
+- grade level
+- curriculum
+- teaching style
 
-## Long-Term Vision
+        ↓
 
-Teacher Toolkit should become a daily productivity tool for teachers.
+Create:
+- lesson plans
+- worksheets
+- quizzes
+- communications
 
-It should feel simple enough for quick tasks but powerful enough to support complex instructional planning.
+        ↓
+
+Students complete assessments
+
+        ↓
+
+Gradebook analyzes results
+
+        ↓
+
+AI generates:
+- intervention groups
+- targeted practice
+- reteaching plans
+- parent updates
+- class summaries
+```
+
+---
+
+# Teacher First Design
+
+Teacher Toolkit should:
+
+- support teachers, not replace them
+- save planning time
+- create editable resources
+- explain recommendations
+- keep teachers in control
+
+---
+
+# Personalized Learning
+
+Long term goal:
+
+Each student develops a learning profile.
+
+Examples:
+
+Student:
+
+```text
+Strengths:
+✓ multiplication facts
+✓ math reasoning
+
+Needs Support:
+- subtraction regrouping
+- multi-step word problems
+
+Recommended:
+- visual models
+- guided practice
+```
+
+AI adapts resources based on student needs.
+
+---
+
+# Platform Goals
+
+## Local Application
+
+Run privately:
+
+- local AI models
+- local database
+- personal teacher assistant
+
+---
+
+## Desktop Application
+
+Provide:
+
+- simple interface
+- dashboards
+- resource library
+- student views
+
+---
+
+## Web Platform
+
+Support:
+
+- multiple teachers
+- accounts
+- classrooms
+- collaboration
+
+---
+
+# AI Philosophy
+
+AI should:
+
+- understand context
+- support decisions
+- create drafts
+- suggest strategies
+
+Teachers remain the instructional experts.
+
+---
+
+# Long Term Vision
+
+Teacher Toolkit becomes a complete classroom operating system:
+
+```text
+Planning
++
+Resources
++
+Students
++
+Assessment
++
+AI Support
++
+Communication
+```
+
+One assistant supporting the entire teaching cycle.
