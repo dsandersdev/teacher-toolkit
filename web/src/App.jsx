@@ -3,15 +3,15 @@ import { api } from "./api/client";
 import "./App.css";
 
 function App() {
+  const [activeSection, setActiveSection] = useState("dashboard");
   const [teacher, setTeacher] = useState(null);
   const [students, setStudents] = useState([]);
   const [assessments, setAssessments] = useState([]);
   const [aiHistory, setAiHistory] = useState([]);
+  const teacherId = 1;
 
   useEffect(() => {
     async function loadDashboard() {
-      const teacherId = 1;
-
       const teacherResponse = await api.get(`/teachers/${teacherId}`);
       const studentsResponse = await api.get(`/students/${teacherId}`);
       const assessmentsResponse = await api.get(
@@ -32,7 +32,15 @@ function App() {
 
   return (
     <main className="dashboard">
-      <h1>Teacher Toolkit Dashboard</h1>
+      <h1>Teacher Toolkit</h1>
+
+      <nav className="nav-tabs">
+        <button onClick={() => setActiveSection("dashboard")}>Dashboard</button>
+        <button onClick={() => setActiveSection("students")}>Students</button>
+        <button onClick={() => setActiveSection("gradebook")}>Gradebook</button>
+        <button onClick={() => setActiveSection("resources")}>Resources</button>
+        <button onClick={() => setActiveSection("ai")}>AI History</button>
+      </nav>
 
       {teacher && (
         <section className="welcome-card">
@@ -41,44 +49,77 @@ function App() {
         </section>
       )}
 
-      <section className="stats-grid">
-        <div className="stat-card">
-          <h3>Students</h3>
-          <p>{students.length}</p>
-        </div>
+      {activeSection === "dashboard" && (
+        <>
+          <section className="stats-grid">
+            <div className="stat-card">
+              <h3>Students</h3>
+              <p>{students.length}</p>
+            </div>
 
-        <div className="stat-card">
-          <h3>Assessments</h3>
-          <p>{assessments.length}</p>
-        </div>
+            <div className="stat-card">
+              <h3>Assessments</h3>
+              <p>{assessments.length}</p>
+            </div>
 
-        <div className="stat-card">
-          <h3>AI Records</h3>
-          <p>{aiHistory.length}</p>
-        </div>
-      </section>
+            <div className="stat-card">
+              <h3>AI Records</h3>
+              <p>{aiHistory.length}</p>
+            </div>
+          </section>
+        </>
+      )}
 
-      <section className="panel">
-        <h2>Students</h2>
+      {activeSection === "students" && (
+        <section className="panel">
+          <h2>Students</h2>
 
-        {students.map((student) => (
-          <div className="list-row" key={student.id}>
-            {student.first_name} {student.last_name}
-          </div>
-        ))}
-      </section>
+          {students.map((student) => (
+            <div className="list-row" key={student.id}>
+              {student.first_name} {student.last_name}
+            </div>
+          ))}
+        </section>
+      )}
 
-      <section className="panel">
-        <h2>Recent AI History</h2>
+      {activeSection === "gradebook" && (
+        <section className="panel">
+          <h2>Assessments</h2>
 
-        {aiHistory.slice(0, 5).map((item) => (
-          <div className="list-row" key={item.id}>
-            <strong>{item.history_type}</strong>
-            <br />
-            {item.created_at}
-          </div>
-        ))}
-      </section>
+          {assessments.map((assessment) => (
+            <div className="list-row" key={assessment.id}>
+              <strong>{assessment.title}</strong>
+              <br />
+              Type: {assessment.assessment_type}
+              <br />
+              Max Score: {assessment.max_score}
+            </div>
+          ))}
+        </section>
+      )}
+
+      {activeSection === "resources" && (
+        <section className="panel">
+          <h2>Resources</h2>
+          <p>Resources page coming next.</p>
+        </section>
+      )}
+
+      {activeSection === "ai" && (
+        <section className="panel">
+          <h2>AI History</h2>
+
+          {aiHistory.map((item) => (
+            <div className="list-row" key={item.id}>
+              <strong>{item.history_type}</strong>
+              <br />
+              {item.created_at}
+              <br />
+              {item.response?.slice(0, 250)}
+            </div>
+          ))}
+        </section>
+      )}
     </main>
   );
 }

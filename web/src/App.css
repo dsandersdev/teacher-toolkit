@@ -44,3 +44,24 @@ p {
   padding: 12px 0;
   color: #374151;
 }
+
+.nav-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.nav-tabs button {
+  background: #1f2937;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.nav-tabs button:hover {
+  background: #374151;
+}
