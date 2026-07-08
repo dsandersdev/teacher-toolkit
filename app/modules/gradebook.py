@@ -21,6 +21,7 @@ class GradebookModule:
         print("11. Generate AI parent progress update") 
         print("12. Generate class performance summary")
         print("13. View AI history")
+        print("14. Student AI Portfolio")
 
         choice = input("\nChoose: ").strip()
 
@@ -455,7 +456,7 @@ class GradebookModule:
                 )
 
                 for row in results:
-                    if row["id"] == student["id"]:
+                    if row["student_id"] == student["id"]:
                         progress_rows.append(
                             {
                                 "assessment": assessment["title"],
@@ -545,7 +546,7 @@ class GradebookModule:
                 )
 
                 for row in results:
-                    if row["id"] == student["id"]:
+                    if row["student_id"] == student["id"]:
                         progress_rows.append(
                             {
                                 "assessment": assessment["title"],
@@ -648,7 +649,7 @@ class GradebookModule:
                 )
 
                 for row in results:
-                    if row["id"] == student["id"]:
+                    if row["student_id"] == student["id"]:
                         progress_rows.append(
                             {
                                 "assessment": assessment["title"],
@@ -817,5 +818,115 @@ class GradebookModule:
                 print("=" * 40)
 
             return
+
+        if choice == "14":
+            students = self.toolkit.student_repository.list_by_teacher(
+                self.toolkit.teacher_id
+            )
+
+            if not students:
+                print("\nNo students found.")
+                return
+
+            print("\n=== Students ===\n")
+
+            for index, student in enumerate(students, start=1):
+                name = (
+                    f"{student['first_name']} "
+                    f"{student['last_name']}"
+                ).strip()
+                print(f"{index}. {name}")
+
+            selected = input("\nChoose student: ").strip()
+
+            if not selected.isdigit():
+                print("Invalid option.")
+                return
+
+            index = int(selected) - 1
+
+            if index < 0 or index >= len(students):
+                print("Invalid option.")
+                return
+
+            student = students[index]
+            student_name = (
+                f"{student['first_name']} "
+                f"{student['last_name']}"
+            ).strip()
+
+            assessments = self.toolkit.assessment_repository.list_by_teacher(
+                self.toolkit.teacher_id
+            )
+
+            progress_rows = []
+
+            for assessment in assessments:
+                results = self.toolkit.gradebook_repository.results_for_assessment(
+                    assessment["id"]
+                )
+
+                for row in results:
+                    if row["student_id"] == student["id"]:
+                        progress_rows.append(
+                            {
+                                "assessment": assessment["title"],
+                                "score": row["score"],
+                                "max_score": assessment["max_score"],
+                                "percent": row["percent"],
+                                "created_at": row["created_at"],
+                            }
+                        )
+
+            ai_history = self.toolkit.ai_history_repository.list_by_student(
+                student["id"]
+            )
+
+            print(f"\n=== Student AI Portfolio: {student_name} ===\n")
+
+            print("Assessment History")
+            print("-" * 40)
+
+            if not progress_rows:
+                print("No assessment scores found.")
+            else:
+                for row in progress_rows:
+                    print(
+                        f"{row['assessment']}: "
+                        f"{row['score']} / {row['max_score']} "
+                        f"({row['percent']}%)"
+                    )
+
+            print("\nAI History")
+            print("-" * 40)
+
+            if not ai_history:
+                print("No student-specific AI history found.")
+            else:
+                for item in ai_history:
+                    print(f"{item['created_at']} | {item['history_type']}")
+                    print(item["response"][:300])
+                    print("-" * 40)
+
+            if len(progress_rows) >= 2:
+                first = progress_rows[0]["percent"]
+                latest = progress_rows[-1]["percent"]
+                growth = latest - first
+
+                print("\nGrowth Summary")
+                print("-" * 40)
+                print(f"First score: {first}%")
+                print(f"Latest score: {latest}%")
+                print(f"Growth: {growth:+.1f}%")
+
+                if growth > 0:
+                    print("Status: Improving")
+                elif growth < 0:
+                    print("Status: Needs continued support")
+                else:
+                    print("Status: No change yet")
+
+            return    
+            
         print("Invalid option.")
     #END manage_gradebook
