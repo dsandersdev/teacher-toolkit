@@ -8,12 +8,15 @@ function App() {
   const [students, setStudents] = useState([]);
   const [assessments, setAssessments] = useState([]);
   const [aiHistory, setAiHistory] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [resourceFilter, setResourceFilter] = useState("");
   const teacherId = 1;
 
   useEffect(() => {
     async function loadDashboard() {
       const teacherResponse = await api.get(`/teachers/${teacherId}`);
       const studentsResponse = await api.get(`/students/${teacherId}`);
+      const resourcesResponse = await api.get("/resources/");
       const assessmentsResponse = await api.get(
         `/gradebook/assessments/${teacherId}`
       );
@@ -25,6 +28,7 @@ function App() {
       setStudents(studentsResponse.data);
       setAssessments(assessmentsResponse.data);
       setAiHistory(aiHistoryResponse.data);
+      setResources(resourcesResponse.data);
     }
 
     loadDashboard();
@@ -101,7 +105,40 @@ function App() {
       {activeSection === "resources" && (
         <section className="panel">
           <h2>Resources</h2>
-          <p>Resources page coming next.</p>
+
+          <div className="filter-buttons">
+            <button onClick={() => setResourceFilter("")}>All</button>
+            <button onClick={() => setResourceFilter("lesson_plan")}>
+              Lesson Plans
+            </button>
+            <button onClick={() => setResourceFilter("worksheet")}>
+              Worksheets
+            </button>
+            <button onClick={() => setResourceFilter("quiz")}>
+              Quizzes
+            </button>
+            <button onClick={() => setResourceFilter("intervention")}>
+              Interventions
+            </button>
+          </div>
+
+          {resources
+            .filter((resource) => {
+              if (!resourceFilter) {
+                return true;
+              }
+
+              return resource.type === resourceFilter;
+            })
+            .map((resource) => (
+              <div className="list-row" key={resource.id}>
+                <strong>{resource.title || "Untitled Resource"}</strong>
+                <br />
+                Type: {resource.type}
+                <br />
+                Created: {resource.created_at}
+              </div>
+            ))}
         </section>
       )}
 
