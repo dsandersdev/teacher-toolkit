@@ -882,51 +882,70 @@ class GradebookModule:
                 student["id"]
             )
 
-            print(f"\n=== Student AI Portfolio: {student_name} ===\n")
+            portfolio = f"# Student AI Portfolio: {student_name}\n\n"
+            portfolio += f"School: {self.toolkit.teacher_profile.school}\n\n"
 
-            print("Assessment History")
-            print("-" * 40)
+            portfolio += "## Assessment History\n\n"
 
             if not progress_rows:
-                print("No assessment scores found.")
+                portfolio += "No assessment scores found.\n\n"
             else:
                 for row in progress_rows:
-                    print(
-                        f"{row['assessment']}: "
+                    portfolio += (
+                        f"- {row['assessment']}: "
                         f"{row['score']} / {row['max_score']} "
-                        f"({row['percent']}%)"
+                        f"({row['percent']}%)\n"
                     )
 
-            print("\nAI History")
-            print("-" * 40)
+            portfolio += "\n## AI History\n\n"
 
             if not ai_history:
-                print("No student-specific AI history found.")
+                portfolio += "No student-specific AI history found.\n\n"
             else:
                 for item in ai_history:
-                    print(f"{item['created_at']} | {item['history_type']}")
-                    print(item["response"][:300])
-                    print("-" * 40)
+                    portfolio += (
+                        f"### {item['created_at']} | "
+                        f"{item['history_type']}\n\n"
+                    )
+                    portfolio += f"{item['response']}\n\n"
 
             if len(progress_rows) >= 2:
                 first = progress_rows[0]["percent"]
                 latest = progress_rows[-1]["percent"]
                 growth = latest - first
 
-                print("\nGrowth Summary")
-                print("-" * 40)
-                print(f"First score: {first}%")
-                print(f"Latest score: {latest}%")
-                print(f"Growth: {growth:+.1f}%")
+                portfolio += "## Growth Summary\n\n"
+                portfolio += f"- First score: {first}%\n"
+                portfolio += f"- Latest score: {latest}%\n"
+                portfolio += f"- Growth: {growth:+.1f}%\n"
 
                 if growth > 0:
-                    print("Status: Improving")
+                    portfolio += "- Status: Improving\n"
                 elif growth < 0:
-                    print("Status: Needs continued support")
+                    portfolio += "- Status: Needs continued support\n"
                 else:
-                    print("Status: No change yet")
+                    portfolio += "- Status: No change yet\n"
 
-            return    
-            
+            print()
+            print(portfolio)
+
+            export_choice = input(
+                "\nExport this portfolio? [y/N]: "
+            ).strip().lower()
+
+            if export_choice == "y":
+                metadata = {
+                    "title": f"Student AI Portfolio for {student_name}",
+                    "student": student_name,
+                }
+
+                self.toolkit.finish(
+                    portfolio,
+                    "student_ai_portfolio",
+                    metadata=metadata,
+                )
+
+            return           
+                   
         print("Invalid option.")
     #END manage_gradebook
