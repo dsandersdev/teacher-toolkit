@@ -10,6 +10,7 @@ function App() {
   const [aiHistory, setAiHistory] = useState([]);
   const [resources, setResources] = useState([]);
   const [resourceFilter, setResourceFilter] = useState("");
+  const [selectedResource, setSelectedResource] = useState(null);
   const teacherId = 1;
 
   useEffect(() => {
@@ -121,24 +122,49 @@ function App() {
               Interventions
             </button>
           </div>
+        {resources
+          .filter((resource) => {
+            if (!resourceFilter) {
+              return true;
+            }
 
-          {resources
-            .filter((resource) => {
-              if (!resourceFilter) {
-                return true;
-              }
+            return resource.type === resourceFilter;
+          })
+          .map((resource) => (
+          <div className="list-row" key={resource.id}>
+            <strong>{resource.title || "Untitled Resource"}</strong>
+            <br />
+            Type: {resource.type}
+            <br />
+            Created: {resource.created_at}
+            <br />
 
-              return resource.type === resourceFilter;
-            })
-            .map((resource) => (
-              <div className="list-row" key={resource.id}>
-                <strong>{resource.title || "Untitled Resource"}</strong>
-                <br />
-                Type: {resource.type}
-                <br />
-                Created: {resource.created_at}
-              </div>
-            ))}
+            <button
+              className="open-button"
+              onClick={() => setSelectedResource(resource)}
+            >
+              Open
+            </button>
+          </div>
+          ))}
+          {selectedResource && (
+            <div className="resource-viewer">
+              <button
+                className="close-button"
+                onClick={() => setSelectedResource(null)}
+              >
+                Close
+              </button>
+
+              <h3>{selectedResource.title || "Untitled Resource"}</h3>
+
+              <p>
+                <strong>Type:</strong> {selectedResource.type}
+              </p>
+
+              <pre>{selectedResource.content}</pre>
+            </div>
+          )}
         </section>
       )}
 
