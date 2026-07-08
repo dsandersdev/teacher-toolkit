@@ -86,3 +86,12 @@ p {
 .filter-buttons button:hover {
   background: #d1d5db;
 }
+
+input {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}

@@ -11,6 +11,9 @@ function App() {
   const [resources, setResources] = useState([]);
   const [resourceFilter, setResourceFilter] = useState("");
   const [selectedResource, setSelectedResource] = useState(null);
+  const [lessonTopic, setLessonTopic] = useState("");
+  const [lessonGrade, setLessonGrade] = useState("2");
+  const [generating, setGenerating] = useState(false);
   const teacherId = 1;
 
   useEffect(() => {
@@ -35,6 +38,28 @@ function App() {
     loadDashboard();
   }, []);
 
+  async function generateLesson() {
+    setGenerating(true);
+
+    const response = await api.post(
+      "/generate/lesson-plan",
+      {
+        teacher_id: teacherId,
+        topic: lessonTopic,
+        grade: lessonGrade,
+        duration: "45 minutes",
+      }
+    );
+
+    setResources([
+      response.data,
+      ...resources,
+    ]);
+
+    setLessonTopic("");
+    setGenerating(false);
+  }
+
   return (
     <main className="dashboard">
       <h1>Teacher Toolkit</h1>
@@ -44,6 +69,7 @@ function App() {
         <button onClick={() => setActiveSection("students")}>Students</button>
         <button onClick={() => setActiveSection("gradebook")}>Gradebook</button>
         <button onClick={() => setActiveSection("resources")}>Resources</button>
+        <button onClick={() => setActiveSection("generate")}>Generate</button>
         <button onClick={() => setActiveSection("ai")}>AI History</button>
       </nav>
 
@@ -165,6 +191,33 @@ function App() {
               <pre>{selectedResource.content}</pre>
             </div>
           )}
+        </section>
+      )}
+
+      {activeSection === "generate" && (
+        <section className="panel">
+          <h2>Create Lesson Plan</h2>
+
+          <input
+            placeholder="Topic"
+            value={lessonTopic}
+            onChange={(e) => setLessonTopic(e.target.value)}
+          />
+
+          <input
+            placeholder="Grade"
+            value={lessonGrade}
+            onChange={(e) => setLessonGrade(e.target.value)}
+          />
+
+          <button
+            onClick={generateLesson}
+            disabled={generating}
+          >
+            {generating
+              ? "Generating..."
+              : "Generate Lesson"}
+          </button>
         </section>
       )}
 
