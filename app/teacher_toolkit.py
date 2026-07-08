@@ -73,7 +73,6 @@ class TeacherToolkit:
         self.gradebook_module = GradebookModule(self)
         self.student_module = StudentModule(self)
         self.profile_module = ProfileModule(self)
-        self.resource_module = ProfileModule(self)
         self.resource_module = ResourceModule(self)
         self.generator_module = GeneratorModule(self)
         self.relationship_repository = RelationshipRepository(
