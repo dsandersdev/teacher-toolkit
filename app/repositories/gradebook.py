@@ -11,6 +11,17 @@ class GradebookRepository:
     ):
         percent = 0
 
+        if score < 0:
+            raise ValueError("Score cannot be negative.")
+
+        if max_score <= 0:
+            raise ValueError("Max score must be greater than zero.")
+
+        if score > max_score:
+            raise ValueError(
+                f"Score cannot be greater than max score ({max_score})."
+            )
+        
         if max_score:
             percent = round((score / max_score) * 100, 2)
 

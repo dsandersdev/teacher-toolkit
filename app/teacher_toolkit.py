@@ -25,6 +25,7 @@ from app.modules.students import StudentModule
 from app.modules.profiles import ProfileModule
 from app.modules.resources import ResourceModule
 from app.modules.generators import GeneratorModule
+from app.repositories.ai_history import AIHistoryRepository
 
 
 class TeacherToolkit:
@@ -69,6 +70,7 @@ class TeacherToolkit:
         self.student_repository = StudentRepository(self.database)
         self.assessment_repository = AssessmentRepository(self.database)
         self.gradebook_repository = GradebookRepository(self.database)
+        self.ai_history_repository = AIHistoryRepository(self.database)
         self.excel_exporter = ExcelGradebookExporter()
         self.gradebook_module = GradebookModule(self)
         self.student_module = StudentModule(self)

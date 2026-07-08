@@ -20,6 +20,7 @@ class GradebookModule:
         print("10. Export student progress report")
         print("11. Generate AI parent progress update") 
         print("12. Generate class performance summary")
+        print("13. View AI history")
 
         choice = input("\nChoose: ").strip()
 
@@ -94,12 +95,16 @@ class GradebookModule:
                 if not score_text:
                     continue
 
-                self.toolkit.gradebook_repository.record_score(
-                    student_id=student["id"],
-                    assessment_id=assessment["id"],
-                    score=float(score_text),
-                    max_score=float(assessment["max_score"]),
-                )
+                try:
+                    self.toolkit.gradebook_repository.record_score(
+                        student_id=student["id"],
+                        assessment_id=assessment["id"],
+                        score=float(score_text),
+                        max_score=float(assessment["max_score"]),
+                    )
+                except ValueError as e:
+                    print(f"Invalid score: {e}")
+
 
             print("\nScores saved.")
             return
@@ -236,6 +241,16 @@ class GradebookModule:
                 assessment_title=assessment["title"],
                 students="\n".join(student_details),
                 grade=grade,
+            )
+            self.toolkit.ai_history_repository.save(
+                teacher_id=self.toolkit.teacher_id,
+                assessment_id=assessment["id"],
+                history_type="intervention",
+                prompt=(
+                    f"Assessment: {assessment['title']}\n"
+                    f"Students:\n{chr(10).join(student_details)}"
+                ),
+                response=result,
             )
 
             metadata = {
@@ -669,6 +684,13 @@ class GradebookModule:
             print("\nGenerating parent progress update...\n")
 
             result = self.toolkit.ai.chat(prompt)
+            self.toolkit.ai_history_repository.save(
+                teacher_id=self.toolkit.teacher_id,
+                student_id=student["id"],
+                history_type="parent_progress_update",
+                prompt=prompt,
+                response=result,
+            )
 
             metadata = {
                 "title": f"Parent Progress Update for {student_name}",
@@ -747,6 +769,13 @@ class GradebookModule:
 
 
             result = self.toolkit.ai.chat(prompt)
+            self.toolkit.ai_history_repository.save(
+                teacher_id=self.toolkit.teacher_id,
+                assessment_id=assessment["id"],
+                history_type="class_summary",
+                prompt=prompt,
+                response=result,
+            )
 
 
             metadata = {
@@ -767,5 +796,26 @@ class GradebookModule:
 
             return
         
+
+        if choice == "13":
+            history = self.toolkit.ai_history_repository.list_by_teacher(
+                self.toolkit.teacher_id
+            )
+
+            print("\n=== AI History ===\n")
+
+            if not history:
+                print("No AI history found.")
+                return
+
+            for item in history:
+                print(f"ID: {item['id']}")
+                print(f"Type: {item['history_type']}")
+                print(f"Created: {item['created_at']}")
+                print("-" * 40)
+                print(item["response"][:500])
+                print("=" * 40)
+
+            return
         print("Invalid option.")
     #END manage_gradebook
