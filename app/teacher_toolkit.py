@@ -24,6 +24,7 @@ from app.modules.gradebook import GradebookModule
 from app.modules.students import StudentModule
 from app.modules.profiles import ProfileModule
 from app.modules.resources import ResourceModule
+from app.modules.generators import GeneratorModule
 
 
 class TeacherToolkit:
@@ -74,6 +75,7 @@ class TeacherToolkit:
         self.profile_module = ProfileModule(self)
         self.resource_module = ProfileModule(self)
         self.resource_module = ResourceModule(self)
+        self.generator_module = GeneratorModule(self)
         self.relationship_repository = RelationshipRepository(
             self.database
         )
@@ -260,67 +262,11 @@ def main():
 
     profile = toolkit.teacher_profile
 
-    item = GENERATOR_REGISTRY[choice]
-    values = {}
-
-    #print("DEBUG choice:", choice)
-    #print("DEBUG item:", item)
-
-    for field, default in item["fields"].items():
-
-        # curriculum from profile
-        if field == "curriculum":
-            profile_curriculum = getattr(
-                profile,
-                "curriculum",
-                None,
-            )
-
-            if profile_curriculum:
-                values[field] = profile_curriculum
-                continue
-
-            default = toolkit.settings.default_curriculum
-
-        # grade from profile
-        if field == "grade":
-            profile_grades = getattr(
-                profile,
-                "grades",
-                None,
-            )
-
-            if profile_grades:
-                default = profile_grades[0]
-
-        label = field.replace("_", " ").title()
-
-        if default:
-            value = input(
-                f"{label} [{default}]: "
-            ).strip()
-
-            values[field] = value or default
-
-        else:
-            values[field] = input(
-                f"{label}: "
-            ).strip()
-
-    generator = toolkit.generators[choice]
-
-    result = generator.generate(**values)
-
-    metadata = {
-        "title": toolkit.build_title(values),
-        **values,
-    }
-
-    toolkit.finish(
-        result,
-        item["prefix"],
-        metadata=metadata,
+    toolkit.generator_module.run(
+        choice,
+        GENERATOR_REGISTRY,
     )
+    return 
 
 
 if __name__ == "__main__":
