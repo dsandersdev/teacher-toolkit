@@ -1,0 +1,46 @@
+body {
+  background: #f5f6fa;
+  color: #1f2937;
+}
+
+.dashboard {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px;
+  font-family: Arial, sans-serif;
+}
+
+h1,
+h2,
+h3,
+p {
+  color: #1f2937;
+}
+
+.welcome-card,
+.stat-card,
+.panel {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.stat-card p {
+  font-size: 36px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.list-row {
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 0;
+  color: #374151;
+}
