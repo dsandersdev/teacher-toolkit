@@ -1,25 +1,80 @@
 # Teacher Toolkit Architecture
 
-Teacher Toolkit is built on top of AI-SDK.
+Teacher Toolkit is an AI-powered teaching assistant designed to help teachers create instructional resources, manage students, analyze assessments, and generate targeted interventions.
 
-The application follows a modular architecture organized by functional domains.
+The project is designed with a modular architecture so it can grow into:
 
-```
-Teacher Toolkit
+- Desktop application
+- Web application
+- API backend
+- Multi-teacher platform
+
+---
+
+# High Level Structure
+
+```text
+Teacher-Toolkit
 │
 ├── app/
-│   ├── main.py
+│   │
 │   ├── teacher_toolkit.py
 │   │
-│   ├── planning/
-│   ├── classroom/
-│   ├── communication/
-│   ├── students/
-│   ├── ai/
-│   ├── services/
-│   └── models/
+│   │   Main application controller
+│   │   Handles:
+│   │   - startup
+│   │   - dependency creation
+│   │   - menu routing
+│   │   - shared save/export workflow
+│   │
+│   ├── modules/
+│   │
+│   │   User workflows and features
+│   │
+│   │   ├── generators.py
+│   │   ├── resources.py
+│   │   ├── profiles.py
+│   │   ├── students.py
+│   │   └── gradebook.py
+│   │
+│   ├── generators/
+│   │
+│   │   AI content generation layer
+│   │
+│   │   Examples:
+│   │   - Lesson plans
+│   │   - Worksheets
+│   │   - Quizzes
+│   │   - Parent emails
+│   │   - Report comments
+│   │   - Intervention plans
+│   │
+│   ├── repositories/
+│   │
+│   │   Data access layer
+│   │
+│   │   Handles:
+│   │   - Teachers
+│   │   - Students
+│   │   - Resources
+│   │   - Assessments
+│   │   - Scores
+│   │
+│   ├── exporters/
+│   │
+│   │   Output generation
+│   │
+│   │   Supports:
+│   │   - Markdown
+│   │   - DOCX
+│   │   - PDF
+│   │   - Excel
+│   │
+│   └── templates/
 │
-├── prompts/
+│       AI prompt templates
+│
+├── database/
 ├── outputs/
 ├── docs/
 └── tests/
@@ -27,83 +82,180 @@ Teacher Toolkit
 
 ---
 
-## Planning
+# Module Layer
 
-Responsible for instructional planning.
+Modules contain user workflows.
 
-Examples:
+Modules do not directly create files or talk to AI.
+
+They coordinate:
+
+```text
+User input
+    ↓
+Module
+    ↓
+Generator / Repository
+    ↓
+Exporter
+```
+
+Current modules:
+
+## Generator Module
+
+Handles:
 
 - Lesson plans
-- Unit plans
-- Standards alignment
-- Scope and sequence
-
----
-
-## Classroom
-
-Responsible for creating classroom materials.
-
-Examples:
-
 - Worksheets
+- Quizzes
+- Parent communication
+- Report comments
+
+
+## Resource Module
+
+Handles:
+
+- Saved resource library
+- Creating quizzes from lessons
+- Creating worksheets from lessons
+- Viewing lesson history
+
+
+## Profile Module
+
+Handles:
+
+- Teacher profiles
+- Curriculum preferences
+- Grade levels
+- Teaching style
+
+
+## Student Module
+
+Handles:
+
+- Student management
+- Student records
+
+
+## Gradebook Module
+
+Handles:
+
 - Assessments
-- Exit tickets
-- Homework
-- Slideshows
-- Classroom games
+- Student scores
+- Performance analysis
+- Intervention workflow
+
+Features:
+
+- Create assessments
+- Enter scores
+- Analyze results
+- Find struggling students
+- Export Excel reports
+- Generate AI interventions
+- Create intervention worksheets
+- Create intervention quizzes
+- Student progress tracking
+- Parent progress updates
+- Class performance summaries
 
 ---
 
-## Communication
+# Generator Layer
 
-Responsible for teacher communication.
+The AI generator layer creates classroom content.
 
 Examples:
 
-- Parent emails
-- Newsletters
-- Report card comments
-- Conference notes
+```text
+modules
+   ↓
+generators
+   ↓
+AI model
+   ↓
+generated resource
+```
+
+Generators use templates instead of hard-coded prompts.
 
 ---
 
-## Students
+# Repository Layer
 
-Responsible for instructional support.
+Repositories isolate storage logic.
 
-Examples:
+The rest of the application does not need to know how data is stored.
 
-- Intervention
-- RTI
-- Differentiation
-- Extension activities
+Current storage can later move to:
 
----
+- SQLite
+- PostgreSQL
+- Cloud database
 
-## AI
-
-Coordinates prompts and AI interactions using AI-SDK.
+without rewriting modules.
 
 ---
 
-## Services
+# Export Layer
 
-Shared application services.
+All resources support multiple outputs:
 
-Examples:
+- Markdown
+- DOCX
+- PDF
+- JSON
 
-- Configuration
-- File export
-- Document generation
-- Templates
+Gradebook additionally supports:
+
+- Excel
 
 ---
 
-## Design Principles
+# AI Integration
 
-- Each module has a single responsibility.
-- AI prompts are stored separately from code.
-- Output should always be classroom-ready.
-- All generated content should be reproducible.
-- Teacher Toolkit extends AI-SDK rather than duplicating SDK functionality.
+Teacher Toolkit uses AI models through an abstraction layer.
+
+Supported goals:
+
+- Local AI
+- RTX GPU acceleration
+- Future cloud models
+
+---
+
+# Design Principles
+
+- Keep user workflows separate from AI logic
+- Keep storage separate from application logic
+- Templates control AI behavior
+- Generated resources should be reusable
+- Every teacher can have separate settings
+- Architecture should support future web conversion
+
+---
+
+# Current Status
+
+Completed:
+
+- Modular refactor
+- Teacher profiles
+- Student management
+- Resource library
+- AI generators
+- Gradebook
+- AI interventions
+- Progress tracking
+- Export system
+
+Next architecture phase:
+
+- API layer
+- Desktop GUI
+- Web dashboard
