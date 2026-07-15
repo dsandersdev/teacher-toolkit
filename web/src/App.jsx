@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { api } from "./api/client";
+import { teacherApi } from "./api/teacherApi";
+import { resourceApi } from "./api/resourceApi";
+import { gradebookApi } from "./api/gradebookApi";
+import { aiApi } from "./api/aiApi";
+import { generateApi } from "./api/generateApi";
 import "./App.css";
 import Navigation from "./components/Navigation";
 import Dashboard from "./components/Dashboard";
@@ -26,47 +30,58 @@ function App() {
 
   useEffect(() => {
     async function loadDashboard() {
-      const teacherResponse = await api.get(`/teachers/${teacherId}`);
-      const studentsResponse = await api.get(`/students/${teacherId}`);
-      const resourcesResponse = await api.get("/resources/");
-      const assessmentsResponse = await api.get(
-        `/gradebook/assessments/${teacherId}`
-      );
-      const aiHistoryResponse = await api.get(
-        `/ai/history/teacher/${teacherId}`
-      );
+      const [
+        teacherData,
+        studentsData,
+        resourcesData,
+        assessmentsData,
+        aiHistoryData,
+      ] = await Promise.all([
+        teacherApi.getTeacher(teacherId),
+        teacherApi.getStudents(teacherId),
+        resourceApi.list(),
+        gradebookApi.getAssessments(teacherId),
+        aiApi.getTeacherHistory(teacherId),
+      ]);
 
-      setTeacher(teacherResponse.data);
-      setStudents(studentsResponse.data);
-      setAssessments(assessmentsResponse.data);
-      setAiHistory(aiHistoryResponse.data);
-      setResources(resourcesResponse.data);
+      setTeacher(teacherData);
+      setStudents(studentsData);
+      setResources(resourcesData);
+      setAssessments(assessmentsData);
+      setAiHistory(aiHistoryData);
     }
 
     loadDashboard();
   }, []);
 
-  async function generateLesson() {
-    setGenerating(true);
-
-    const response = await api.post(
-      "/generate/lesson-plan",
-      {
-        teacher_id: teacherId,
-        topic: lessonTopic,
-        grade: lessonGrade,
-        duration: "45 minutes",
+    async function generateLesson() {
+      if (!lessonTopic.trim()) {
+        return;
       }
-    );
 
-    setResources([
-      response.data,
-      ...resources,
-    ]);
+      setGenerating(true);
 
-    setLessonTopic("");
-    setGenerating(false);
-  }
+      try {
+        const resource = await generateApi.lessonPlan({
+          teacherId,
+          topic: lessonTopic.trim(),
+          grade: lessonGrade.trim(),
+        });
+
+        setResources((currentResources) => [
+          resource,
+          ...currentResources,
+        ]);
+
+        setLessonTopic("");
+        setSelectedResource(resource);
+        setActiveSection("resources");
+      } catch (error) {
+        console.error("Lesson generation failed:", error);
+      } finally {
+        setGenerating(false);
+      }
+    }
 
   return (
     <main className="dashboard">
