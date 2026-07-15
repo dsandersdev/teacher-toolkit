@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { api } from "./api/client";
 import "./App.css";
+import Navigation from "./components/Navigation";
+import Dashboard from "./components/Dashboard";
+import Students from "./components/Students";
+import Gradebook from "./components/Gradebook";
+import AIHistory from "./components/AIHistory";
+import Generator from "./components/Generator";
+import Resources from "./components/Resources";
+
 
 function App() {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -64,15 +72,10 @@ function App() {
     <main className="dashboard">
       <h1>Teacher Toolkit</h1>
 
-      <nav className="nav-tabs">
-        <button onClick={() => setActiveSection("dashboard")}>Dashboard</button>
-        <button onClick={() => setActiveSection("students")}>Students</button>
-        <button onClick={() => setActiveSection("gradebook")}>Gradebook</button>
-        <button onClick={() => setActiveSection("resources")}>Resources</button>
-        <button onClick={() => setActiveSection("generate")}>Generate</button>
-        <button onClick={() => setActiveSection("ai")}>AI History</button>
-      </nav>
-
+      <Navigation
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+      />
       {teacher && (
         <section className="welcome-card">
           <h2>Welcome {teacher.name}</h2>
@@ -81,160 +84,45 @@ function App() {
       )}
 
       {activeSection === "dashboard" && (
-        <>
-          <section className="stats-grid">
-            <div className="stat-card">
-              <h3>Students</h3>
-              <p>{students.length}</p>
-            </div>
-
-            <div className="stat-card">
-              <h3>Assessments</h3>
-              <p>{assessments.length}</p>
-            </div>
-
-            <div className="stat-card">
-              <h3>AI Records</h3>
-              <p>{aiHistory.length}</p>
-            </div>
-          </section>
-        </>
+        <Dashboard
+          students={students}
+          assessments={assessments}
+          aiHistory={aiHistory}
+        />
       )}
 
       {activeSection === "students" && (
-        <section className="panel">
-          <h2>Students</h2>
-
-          {students.map((student) => (
-            <div className="list-row" key={student.id}>
-              {student.first_name} {student.last_name}
-            </div>
-          ))}
-        </section>
+        <Students students={students} />
       )}
 
       {activeSection === "gradebook" && (
-        <section className="panel">
-          <h2>Assessments</h2>
-
-          {assessments.map((assessment) => (
-            <div className="list-row" key={assessment.id}>
-              <strong>{assessment.title}</strong>
-              <br />
-              Type: {assessment.assessment_type}
-              <br />
-              Max Score: {assessment.max_score}
-            </div>
-          ))}
-        </section>
+        <Gradebook assessments={assessments} />
       )}
 
       {activeSection === "resources" && (
-        <section className="panel">
-          <h2>Resources</h2>
-
-          <div className="filter-buttons">
-            <button onClick={() => setResourceFilter("")}>All</button>
-            <button onClick={() => setResourceFilter("lesson_plan")}>
-              Lesson Plans
-            </button>
-            <button onClick={() => setResourceFilter("worksheet")}>
-              Worksheets
-            </button>
-            <button onClick={() => setResourceFilter("quiz")}>
-              Quizzes
-            </button>
-            <button onClick={() => setResourceFilter("intervention")}>
-              Interventions
-            </button>
-          </div>
-        {resources
-          .filter((resource) => {
-            if (!resourceFilter) {
-              return true;
-            }
-
-            return resource.type === resourceFilter;
-          })
-          .map((resource) => (
-          <div className="list-row" key={resource.id}>
-            <strong>{resource.title || "Untitled Resource"}</strong>
-            <br />
-            Type: {resource.type}
-            <br />
-            Created: {resource.created_at}
-            <br />
-
-            <button
-              className="open-button"
-              onClick={() => setSelectedResource(resource)}
-            >
-              Open
-            </button>
-          </div>
-          ))}
-          {selectedResource && (
-            <div className="resource-viewer">
-              <button
-                className="close-button"
-                onClick={() => setSelectedResource(null)}
-              >
-                Close
-              </button>
-
-              <h3>{selectedResource.title || "Untitled Resource"}</h3>
-
-              <p>
-                <strong>Type:</strong> {selectedResource.type}
-              </p>
-
-              <pre>{selectedResource.content}</pre>
-            </div>
-          )}
-        </section>
-      )}
+        <Resources
+          resources={resources}
+          resourceFilter={resourceFilter}
+          selectedResource={selectedResource}
+          onFilterChange={setResourceFilter}
+          onSelectResource={setSelectedResource}
+          onCloseResource={() => setSelectedResource(null)}
+        />
+      )} 
 
       {activeSection === "generate" && (
-        <section className="panel">
-          <h2>Create Lesson Plan</h2>
-
-          <input
-            placeholder="Topic"
-            value={lessonTopic}
-            onChange={(e) => setLessonTopic(e.target.value)}
-          />
-
-          <input
-            placeholder="Grade"
-            value={lessonGrade}
-            onChange={(e) => setLessonGrade(e.target.value)}
-          />
-
-          <button
-            onClick={generateLesson}
-            disabled={generating}
-          >
-            {generating
-              ? "Generating..."
-              : "Generate Lesson"}
-          </button>
-        </section>
+        <Generator
+          lessonTopic={lessonTopic}
+          lessonGrade={lessonGrade}
+          generating={generating}
+          onTopicChange={setLessonTopic}
+          onGradeChange={setLessonGrade}
+          onGenerate={generateLesson}
+        />
       )}
 
       {activeSection === "ai" && (
-        <section className="panel">
-          <h2>AI History</h2>
-
-          {aiHistory.map((item) => (
-            <div className="list-row" key={item.id}>
-              <strong>{item.history_type}</strong>
-              <br />
-              {item.created_at}
-              <br />
-              {item.response?.slice(0, 250)}
-            </div>
-          ))}
-        </section>
+        <AIHistory aiHistory={aiHistory} />
       )}
     </main>
   );
