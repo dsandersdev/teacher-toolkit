@@ -52,6 +52,22 @@ class TeacherRepository:
             row = cursor.fetchone()
             return dict(row) if row else None
 
+    def list_all(self):
+        with self.database.connect() as connection:
+            cursor = connection.cursor()
+
+            cursor.execute(
+                """
+                SELECT *
+                FROM teachers
+                ORDER BY name
+                """
+            )
+
+            rows = cursor.fetchall()
+
+            return [dict(row) for row in rows]
+
     def find_by_name(self, name: str):
         with self.database.connect() as connection:
             cursor = connection.cursor()

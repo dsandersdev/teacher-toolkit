@@ -1,3 +1,5 @@
+import Button from "./ui/Button";
+
 function Generator({
   lessonTopic,
   lessonGrade,
@@ -22,9 +24,12 @@ function Generator({
         onChange={(event) => onGradeChange(event.target.value)}
       />
 
-      <button onClick={onGenerate} disabled={generating}>
-        {generating ? "Generating..." : "Generate Lesson"}
-      </button>
+    <Button
+      onClick={onGenerate}
+      disabled={generating}
+    >
+      {generating ? "Generating..." : "Generate Lesson"}
+    </Button>
     </section>
   );
 }

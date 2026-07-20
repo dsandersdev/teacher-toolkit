@@ -33,8 +33,9 @@ class StudentRepository:
 
             connection.commit()
 
-            return cursor.lastrowid
+            student_id = cursor.lastrowid
 
+            return self.get(student_id)
     def get(self, student_id: int):
         with self.database.connect() as connection:
             cursor = connection.cursor()

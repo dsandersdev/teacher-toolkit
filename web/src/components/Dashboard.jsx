@@ -1,6 +1,8 @@
+import Card from "./ui/Card";
+
 function Dashboard({ students, assessments, aiHistory }) {
   return (
-    <section className="stats-grid">
+    <card title="Dashboard">
       <div className="stat-card">
         <h3>Students</h3>
         <p>{students.length}</p>
@@ -15,7 +17,7 @@ function Dashboard({ students, assessments, aiHistory }) {
         <h3>AI Records</h3>
         <p>{aiHistory.length}</p>
       </div>
-    </section>
+    </card>
   );
 }
 

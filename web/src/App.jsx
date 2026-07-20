@@ -12,11 +12,13 @@ import Gradebook from "./components/Gradebook";
 import AIHistory from "./components/AIHistory";
 import Generator from "./components/Generator";
 import Resources from "./components/Resources";
+import { useTeacher } from "./context/TeacherContext";
+import Spinner from "./components/ui/Spinner";
+import TeacherSelector from "./components/TeacherSelector";
 
 
 function App() {
   const [activeSection, setActiveSection] = useState("dashboard");
-  const [teacher, setTeacher] = useState(null);
   const [students, setStudents] = useState([]);
   const [assessments, setAssessments] = useState([]);
   const [aiHistory, setAiHistory] = useState([]);
@@ -26,17 +28,30 @@ function App() {
   const [lessonTopic, setLessonTopic] = useState("");
   const [lessonGrade, setLessonGrade] = useState("2");
   const [generating, setGenerating] = useState(false);
-  const teacherId = 1;
+  const [loading, setLoading] = useState(true);
+  const {
+    teacherId,
+    setTeacherId,
+    teacher,
+    setTeacher,
+    teachers,
+    setTeachers,
+  } = useTeacher();
 
   useEffect(() => {
-    async function loadDashboard() {
+  async function loadDashboard() {
+    setLoading(true);
+
+    try {
       const [
+        teachersData,
         teacherData,
         studentsData,
         resourcesData,
         assessmentsData,
         aiHistoryData,
       ] = await Promise.all([
+        teacherApi.list(),
         teacherApi.getTeacher(teacherId),
         teacherApi.getStudents(teacherId),
         resourceApi.list(),
@@ -44,15 +59,44 @@ function App() {
         aiApi.getTeacherHistory(teacherId),
       ]);
 
+      setTeachers(teachersData);
       setTeacher(teacherData);
       setStudents(studentsData);
       setResources(resourcesData);
       setAssessments(assessmentsData);
       setAiHistory(aiHistoryData);
+    } catch (error) {
+      console.error("Dashboard loading failed:", error);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    loadDashboard();
-  }, []);
+  loadDashboard();
+}, [teacherId, setTeacher, setTeachers]);
+
+    async function addStudent(name) {
+      const parts = name.trim().split(/\s+/);
+      const firstName = parts.shift();
+      const lastName = parts.join(" ");
+
+      try {
+        const student = await teacherApi.createStudent({
+          teacher_id: teacherId,
+          first_name: firstName,
+          last_name: lastName,
+          grade_level: "",
+        });
+
+        setStudents((currentStudents) => [
+          ...currentStudents,
+          student,
+        ]);
+      } catch (error) {
+        console.error("Adding student failed:", error);
+        throw error;
+      }
+    }
 
     async function generateLesson() {
       if (!lessonTopic.trim()) {
@@ -83,6 +127,10 @@ function App() {
       }
     }
 
+    if (loading) {
+      return <Spinner message="Loading Teacher Toolkit..." />;
+    }
+
   return (
     <main className="dashboard">
       <h1>Teacher Toolkit</h1>
@@ -91,6 +139,13 @@ function App() {
         activeSection={activeSection}
         onSectionChange={setActiveSection}
       />
+
+      <TeacherSelector
+        teachers={teachers}
+        teacherId={teacherId}
+        onTeacherChange={setTeacherId}
+      />
+
       {teacher && (
         <section className="welcome-card">
           <h2>Welcome {teacher.name}</h2>
@@ -107,7 +162,10 @@ function App() {
       )}
 
       {activeSection === "students" && (
-        <Students students={students} />
+        <Students
+          students={students}
+          onAddStudent={addStudent}
+        />
       )}
 
       {activeSection === "gradebook" && (

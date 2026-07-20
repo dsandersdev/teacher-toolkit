@@ -15,6 +15,11 @@ def get_repository():
     return TeacherRepository(database)
 
 
+@router.get("")
+def list_teachers():
+    repository = get_repository()
+    return repository.list_all()
+
 @router.get("/{teacher_id}")
 def get_teacher(teacher_id: int):
     repository = get_repository()
